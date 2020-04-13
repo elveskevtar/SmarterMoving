@@ -23,4 +23,8 @@ public class SmartPlayerBase extends ClientPlayerBase {
 	public void afterOnUpdate() {
 		SMPlayer.afterOnUpdate();
 	}
+	
+	public SmartPlayer getSmartPlayer() {
+		return SMPlayer;
+	}
 }

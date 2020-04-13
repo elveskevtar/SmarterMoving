@@ -3,6 +3,7 @@ package net.smart.moving.player;
 import java.util.HashMap;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -28,27 +29,8 @@ public class SmartPlayer extends SMBase {
 		this.base = base;
 	}
 	
-	public void afterOnUpdate() {
-		if (!player.hasCapability(SmartStateProvider.CAPABILITY_STATE, null))
-			return;
-		
-		ISmartStateHandler handler = player.getCapability(SmartStateProvider.CAPABILITY_STATE, null);
-		State state = State.getState(handler.getSmartState());
-		if (state == State.INVALID)
-			return;
-		
-		if (state == State.IDLE) {
-			player.height = 1.8F;
-			player.eyeHeight = player.getDefaultEyeHeight();
-		} else if (state == State.CRAWL) {
-			player.height = 0.65F;
-			player.eyeHeight = 0.5F;
-		}
-		
-		updateBoundingBox();
-	}
-	
 	public static void onPlayerTick(EntityPlayer player) {
+		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
 		if (!player.hasCapability(SmartStateProvider.CAPABILITY_STATE, null))
 			return;
 		
@@ -60,7 +42,11 @@ public class SmartPlayer extends SMBase {
 		boolean grab = Input.isKeyDown(Options.grabKey);
 		
 		State newState = State.IDLE;
+		int entHeight = Math.max(Math.round(player.height), 1);
 		if (player.isSneaking() && grab)
+			newState = State.CRAWL;
+		if (state == State.CRAWL && newState != State.CRAWL &&
+				!smartPlayer.isHeadspaceFree(player.getPosition(), entHeight))
 			newState = State.CRAWL;
 		
 		if (newState != state) {

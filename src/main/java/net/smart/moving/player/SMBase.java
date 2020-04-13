@@ -13,6 +13,7 @@ import net.smart.moving.config.SmartOptions;
 import net.smart.moving.input.SmartInput;
 import net.smart.moving.network.SmartPacketHandler;
 import net.smart.moving.network.packet.StatePacket;
+import net.smart.moving.player.SMBase.State;
 
 public abstract class SMBase {
 	
@@ -32,7 +33,11 @@ public abstract class SMBase {
 			return State.INVALID;
 		}
 	}
-
+	
+	private static final float defaultHeight = 1.8F;
+	private static final float crawlHeight = 0.65F;
+	private static final float crawlEyeHeight = 0.5F;
+	
 	protected EntityPlayer player;
 	protected State state;
 	
@@ -45,6 +50,26 @@ public abstract class SMBase {
 		this.state = state;
 	}
 	
+	public void afterOnUpdate() {
+		if (!player.hasCapability(SmartStateProvider.CAPABILITY_STATE, null))
+			return;
+
+		ISmartStateHandler handler = player.getCapability(SmartStateProvider.CAPABILITY_STATE, null);
+		State state = State.getState(handler.getSmartState());
+		if (state == State.INVALID)
+			return;
+		
+		if (state == State.IDLE) {
+			player.height = defaultHeight;
+			player.eyeHeight = player.getDefaultEyeHeight();
+		} else if (state == State.CRAWL) {
+			player.height = crawlHeight;
+			player.eyeHeight = crawlEyeHeight;
+		}
+		
+		updateBoundingBox();
+	}
+	
 	protected void updateBoundingBox() {
 		final double d0 = player.width / 2.0D;
 		final AxisAlignedBB aabb = player.getEntityBoundingBox();
@@ -52,16 +77,16 @@ public abstract class SMBase {
 				player.posZ - d0, player.posX + d0, aabb.minY + player.height, player.posZ + d0));
 	}
 	
-	protected boolean isOpenBlockSpace(BlockPos pos, boolean top) {
+	protected boolean isOpenBlockSpace(BlockPos pos) {
 		IBlockState blockState = player.world.getBlockState(pos);
 		IBlockState upBlockState = player.world.getBlockState(pos.up());
 		return !blockState.getBlock().isNormalCube(blockState, player.world, pos)
-				&& (!top || !upBlockState.getBlock().isNormalCube(blockState, player.world, pos.up()));
+				&& !upBlockState.getBlock().isNormalCube(upBlockState, player.world, pos.up());
 	}
 	
-	protected boolean isHeadspaceFree(BlockPos pos, int height, boolean top) {
+	protected boolean isHeadspaceFree(BlockPos pos, int height) {
 		for (int y = 0; y < height; y++)
-			if (isOpenBlockSpace(pos.add(0, y, 0), top))
+			if (!isOpenBlockSpace(pos.add(0, y, 0)))
 				return false;
 		return true;
 	}
