@@ -4,7 +4,9 @@ import org.apache.logging.log4j.Logger;
 
 import api.player.client.ClientPlayerAPI;
 import api.player.model.ModelPlayerAPI;
+import api.player.model.ModelPlayerBaseSorting;
 import api.player.render.RenderPlayerAPI;
+import api.player.render.RenderPlayerBaseSorting;
 import api.player.server.ServerPlayerAPI;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,6 +54,7 @@ public class SmartMoving {
     	
     	if (event.getSide() == Side.CLIENT) {
     		playerAPI_register();
+    		SmartMovingFactory.initialize();
     		SmartMovingContext.initialize();
     	}
     }
@@ -79,7 +82,17 @@ public class SmartMoving {
     }
     
     private void renderAPI_register() {
-    	RenderPlayerAPI.register(NAME, SmartRenderPlayerBase.class);
-    	ModelPlayerAPI.register(NAME, SmartModelPlayerBase.class);
+    	String[] inferiors = new String[] { NAME };
+
+		RenderPlayerBaseSorting renderSorting = new RenderPlayerBaseSorting();
+		renderSorting.setAfterLocalConstructingInferiors(inferiors);
+		renderSorting.setOverrideDoRenderInferiors(inferiors);
+		renderSorting.setOverrideRotateCorpseInferiors(inferiors);
+		renderSorting.setOverrideRenderLivingAtInferiors(inferiors);
+    	RenderPlayerAPI.register(NAME, SmartRenderPlayerBase.class, renderSorting);
+    	
+    	ModelPlayerBaseSorting modelSorting = new ModelPlayerBaseSorting();
+		modelSorting.setAfterLocalConstructingInferiors(inferiors);
+    	ModelPlayerAPI.register(NAME, SmartModelPlayerBase.class, modelSorting);
     }
 }

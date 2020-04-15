@@ -17,7 +17,7 @@ import net.smart.moving.player.SMBase.State;
 
 public abstract class SMBase {
 	
-	protected static enum State {
+	public static enum State {
 		INVALID(-1), IDLE(0), CRAWL(1);
 		
 		public final byte id;
@@ -89,5 +89,9 @@ public abstract class SMBase {
 			if (!isOpenBlockSpace(pos.add(0, y, 0)))
 				return false;
 		return true;
+	}
+	
+	public State getState() {
+		return state;
 	}
 }
