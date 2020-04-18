@@ -10,8 +10,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.smart.moving.SmartMoving;
 import net.smart.moving.capabilities.ISmartStateHandler;
 import net.smart.moving.capabilities.SmartStateProvider;
-import net.smart.moving.player.SMBase;
+import net.smart.moving.player.SmartBase;
 import net.smart.moving.player.SmartServerPlayerBase;
+import net.smart.moving.player.SmartBase.State;
 
 public class StatePacket implements IMessage {
 
@@ -65,13 +66,7 @@ public class StatePacket implements IMessage {
 		}
 		
 		private void processMessage(StatePacket message, MessageContext ctx, EntityPlayer player) {
-			SmartServerPlayerBase base = SmartServerPlayerBase.getPlayerBase(player);
-			
-			if (!player.hasCapability(SmartStateProvider.CAPABILITY_STATE, null))
-				return;
-			
-			ISmartStateHandler handler = player.getCapability(SmartStateProvider.CAPABILITY_STATE, null);
-			handler.setSmartState(message.state);
+			SmartBase.setState(player, State.getState(message.state));
 		}
 	}
 }

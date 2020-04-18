@@ -17,13 +17,24 @@
 
 package net.smart.moving.model;
 
+import static net.smart.moving.render.SmartRender.NoScaleEnd;
+import static net.smart.moving.render.SmartRender.NoScaleStart;
+import static net.smart.moving.render.SmartRender.Scale;
+import static net.smart.moving.utilities.RenderUtilities.Eighth;
+import static net.smart.moving.utilities.RenderUtilities.Half;
+import static net.smart.moving.utilities.RenderUtilities.Quarter;
+import static net.smart.moving.utilities.RenderUtilities.RadiantToAngle;
+import static net.smart.moving.utilities.RenderUtilities.Sixteenth;
+import static net.smart.moving.utilities.RenderUtilities.Sixtyfourth;
+import static net.smart.moving.utilities.RenderUtilities.Thirtytwoth;
+import static net.smart.moving.utilities.RenderUtilities.Whole;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
 
-import api.player.model.IModelPlayer;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelBiped.ArmPose;
 import net.minecraft.client.model.ModelBox;
@@ -31,7 +42,7 @@ import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import net.smart.moving.player.SMBase;
+import net.smart.moving.player.SmartBase;
 import net.smart.moving.render.SmartModelCapeRenderer;
 import net.smart.moving.render.SmartModelEarsRenderer;
 import net.smart.moving.render.SmartModelRotationRenderer;
@@ -44,29 +55,11 @@ import net.smart.properties.Reflect;
 public class SmartModel {
 	
 	private SmartModelPlayerBase base;
-	private SmartModel smartModel;
 	public ModelBiped modelBiped;
 
 	private boolean isModelPlayer;
 	private boolean smallArms;
 
-	public boolean isInventory;
-
-	public float totalVerticalDistance;
-	public float currentVerticalSpeed;
-	public float totalDistance;
-	public float currentSpeed;
-
-	public double distance;
-	public double verticalDistance;
-	public double horizontalDistance;
-	public float currentCameraAngle;
-	public float currentVerticalAngle;
-	public float currentHorizontalAngle;
-
-	public float actualRotation;
-	public float forwardRotation;
-	public float workingAngle;
 
 	public SmartModelRotationRenderer bipedOuter;
 	public SmartModelRotationRenderer bipedTorso;
@@ -92,8 +85,11 @@ public class SmartModel {
 	public SmartModelEarsRenderer bipedEars;
 	public SmartModelCapeRenderer bipedCloak;
 
+	public float actualRotation;
+	
 	public SmartRenderData prevOuterRenderData;
 	public boolean isSleeping;
+	public boolean isInventory;
 
 	private final static Name ModelRenderer_textureOffsetX = new Name("textureOffsetX", "field_78803_o", "r");
 	private final static Name ModelRenderer_textureOffsetY = new Name("textureOffsetY", "field_78813_p", "s");
@@ -103,7 +99,9 @@ public class SmartModel {
 	public int scaleArmType;
 	public int scaleLegType;
 	
-	public SMBase.State state;
+	public SmartBase.State state;
+	public float currentHorizontalSpeedFlattened;
+	public float prevMoveAngle;
 
 	public SmartModel(boolean smallArms, ModelBiped modelBiped, SmartModelPlayerBase base, ModelRenderer originalBipedBody,
 			ModelRenderer originalBipedBodywear, ModelRenderer originalBipedHead, ModelRenderer originalBipedHeadwear,
@@ -159,6 +157,16 @@ public class SmartModel {
 		base.initialize(bipedBody, bipedBodywear, bipedHead, bipedHeadwear, bipedRightArm, bipedRightArmwear,
 				bipedLeftArm, bipedLeftArmwear, bipedRightLeg, bipedRightLegwear, bipedLeftLeg, bipedLeftLegwear,
 				bipedCloak, bipedEars);
+		
+		if (SmartRender.CurrentMainModel != null) {
+			isInventory = SmartRender.CurrentMainModel.isInventory;
+			
+			prevOuterRenderData = SmartRender.CurrentMainModel.prevOuterRenderData;
+			isSleeping = SmartRender.CurrentMainModel.isSleeping;
+			
+			state = SmartRender.CurrentMainModel.state;
+			currentHorizontalSpeedFlattened = SmartRender.CurrentMainModel.currentHorizontalSpeedFlattened;
+		}
 	}
 
 	private SmartModelRotationRenderer create(SmartModelRotationRenderer base) {
@@ -231,9 +239,29 @@ public class SmartModel {
 	}
 
 	public void setRotationAngles(float totalHorizontalDistance, float currentHorizontalSpeed, float totalTime,
-			float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor, Entity entity) {
+			float viewHorizontalAngleOffset, float viewVerticalAngleOffset, float factor, Entity entity) {
 		reset();
 
+		if (state != null) {
+			switch (state) {
+			case IDLE:
+				animateStandard(totalHorizontalDistance, currentHorizontalSpeed,
+						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
+						factor, entity);
+				break;
+			case CRAWL:
+				animateCrawling(totalHorizontalDistance, currentHorizontalSpeed,
+						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
+						factor, entity);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	public void animateStandard(float totalHorizontalDistance, float currentHorizontalSpeed, float totalTime,
+			float viewHorizontalAngleOffset, float viewVerticalAngleOffset, float factor, Entity entity) {
 		if (isInventory) {
 			bipedBody.ignoreBase = true;
 			bipedHead.ignoreBase = true;
@@ -277,7 +305,7 @@ public class SmartModel {
 			bipedLeftLeg.setRotationPoint(2.0F, 12F, 0.0F);
 
 			base.superSetRotationAngles(totalHorizontalDistance, currentHorizontalSpeed, totalTime,
-					viewHorizontalAngelOffset, viewVerticalAngelOffset, factor, entity);
+					viewHorizontalAngleOffset, viewVerticalAngleOffset, factor, entity);
 			return;
 		}
 
@@ -289,48 +317,48 @@ public class SmartModel {
 
 		bipedOuter.prevData = prevOuterRenderData;
 
-		bipedOuter.rotateAngleY = actualRotation / RenderUtilities.RadiantToAngle;
+		bipedOuter.rotateAngleY = actualRotation / RadiantToAngle;
 		bipedOuter.fadeRotateAngleY = !entity.isRiding();
 
-		base.animateHeadRotation(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset,
-				viewVerticalAngelOffset, factor);
+		base.animateHeadRotation(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngleOffset,
+				viewVerticalAngleOffset, factor);
 
 		if (isSleeping)
-			base.animateSleeping(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset,
-					viewVerticalAngelOffset, factor);
+			base.animateSleeping(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngleOffset,
+					viewVerticalAngleOffset, factor);
 
-		base.animateArmSwinging(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset,
-				viewVerticalAngelOffset, factor);
+		base.animateArmSwinging(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngleOffset,
+				viewVerticalAngleOffset, factor);
 
 		if (modelBiped.isRiding)
-			base.animateRiding(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset,
-					viewVerticalAngelOffset, factor);
+			base.animateRiding(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngleOffset,
+					viewVerticalAngleOffset, factor);
 
 		if (modelBiped.leftArmPose != ArmPose.EMPTY)
 			base.animateLeftArmItemHolding(totalHorizontalDistance, currentHorizontalSpeed, totalTime,
-					viewHorizontalAngelOffset, viewVerticalAngelOffset, factor);
+					viewHorizontalAngleOffset, viewVerticalAngleOffset, factor);
 
 		if (modelBiped.rightArmPose != ArmPose.EMPTY)
 			base.animateRightArmItemHolding(totalHorizontalDistance, currentHorizontalSpeed, totalTime,
-					viewHorizontalAngelOffset, viewVerticalAngelOffset, factor);
+					viewHorizontalAngleOffset, viewVerticalAngleOffset, factor);
 
 		if (modelBiped.swingProgress > -9990F) {
 			base.animateWorkingBody(totalHorizontalDistance, currentHorizontalSpeed, totalTime,
-					viewHorizontalAngelOffset, viewVerticalAngelOffset, factor);
+					viewHorizontalAngleOffset, viewVerticalAngleOffset, factor);
 			base.animateWorkingArms(totalHorizontalDistance, currentHorizontalSpeed, totalTime,
-					viewHorizontalAngelOffset, viewVerticalAngelOffset, factor);
+					viewHorizontalAngleOffset, viewVerticalAngleOffset, factor);
 		}
 
 		if (modelBiped.isSneak)
-			base.animateSneaking(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset,
-					viewVerticalAngelOffset, factor);
+			base.animateSneaking(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngleOffset,
+					viewVerticalAngleOffset, factor);
 
-		base.animateArms(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset,
-				viewVerticalAngelOffset, factor);
+		base.animateArms(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngleOffset,
+				viewVerticalAngleOffset, factor);
 
 		if (modelBiped.rightArmPose == ArmPose.BOW_AND_ARROW || modelBiped.leftArmPose == ArmPose.BOW_AND_ARROW)
-			base.animateBowAiming(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset,
-					viewVerticalAngelOffset, factor);
+			base.animateBowAiming(totalHorizontalDistance, currentHorizontalSpeed, totalTime, viewHorizontalAngleOffset,
+					viewVerticalAngleOffset, factor);
 
 		if (bipedOuter.prevData != null && !bipedOuter.fadeRotateAngleX)
 			bipedOuter.prevData.rotateAngleX = bipedOuter.rotateAngleX;
@@ -343,14 +371,63 @@ public class SmartModel {
 
 		if (isModelPlayer) {
 			bipedCloak.ignoreBase = false;
-			bipedCloak.rotateAngleX = RenderUtilities.Sixtyfourth;
+			bipedCloak.rotateAngleX = Sixtyfourth;
 		}
 	}
+	
+	public void animateCrawling(float totalHorizontalDistance, float currentHorizontalSpeed, float totalTime,
+			float viewHorizontalAngleOffset, float viewVerticalAngleOffset, float factor, Entity entity) {
+		/* Rotate head */
+		bipedHead.rotationPointZ = -2F;
+		bipedHead.rotateAngleZ = -viewHorizontalAngleOffset / RadiantToAngle;
+		bipedHead.rotateAngleX = -Eighth;
+		
+		/* Rotate biped flat on the ground */
+		bipedTorso.rotationOrder = SmartModelRotationRenderer.YZX;
+		bipedTorso.rotateAngleX = Quarter - Thirtytwoth;
+		bipedTorso.offsetZ = -entity.height;
+		
+		/* Rotate torso back and forth*/
+		float distance = totalHorizontalDistance * 0.5F;
+		float walkFactor = Factor(currentHorizontalSpeed, 0F, 0.12951545F);
+		float standFactor = Factor(currentHorizontalSpeed, 0.12951545F, 0F);
+		bipedTorso.rotationPointY = 3F;
+		bipedTorso.rotateAngleZ = MathHelper.cos(distance + Quarter) * Sixtyfourth * walkFactor;
+		bipedBody.rotateAngleY = MathHelper.cos(distance + Half) * Sixtyfourth * walkFactor;
+		
+		/* Rotate legs */
+		bipedRightLeg.rotateAngleX = (MathHelper.cos(distance - Quarter)
+				* Sixtyfourth + Thirtytwoth) * walkFactor + Thirtytwoth * standFactor;
+		bipedLeftLeg.rotateAngleX = (MathHelper.cos(distance - Half - Quarter)
+				* Sixtyfourth + Thirtytwoth) * walkFactor + Thirtytwoth * standFactor;
+		bipedRightLeg.rotateAngleZ = (MathHelper.cos(distance - Quarter) + 1F)
+				* 0.25F * walkFactor + Thirtytwoth * standFactor;
+		bipedLeftLeg.rotateAngleZ = (MathHelper.cos(distance - Quarter) - 1F)
+				* 0.25F * walkFactor - Thirtytwoth * standFactor;
+		if (scaleLegType != NoScaleStart)
+			setLegScales(1F + (MathHelper.cos(distance) - 1F) * 0.25F * walkFactor,
+					1F + (MathHelper.cos(distance - Quarter - Quarter) - 1F) * 0.25F * walkFactor);
+		
+		/* Rotate arms */
+		bipedRightArm.rotationOrder = SmartModelRotationRenderer.YZX;
+		bipedLeftArm.rotationOrder = SmartModelRotationRenderer.YZX;
+		bipedRightArm.rotateAngleX = Half + Eighth;
+		bipedLeftArm.rotateAngleX = Half + Eighth;
+		bipedRightArm.rotateAngleZ = ((MathHelper.cos(distance + Half)) * Sixtyfourth + Thirtytwoth)
+				* walkFactor + Sixteenth * standFactor;
+		bipedLeftArm.rotateAngleZ = ((MathHelper.cos(distance + Half)) * Sixtyfourth - Thirtytwoth)
+				* walkFactor - Sixteenth * standFactor;
+		bipedRightArm.rotateAngleY = -Quarter;
+		bipedLeftArm.rotateAngleY = Quarter;
+		if (scaleArmType != NoScaleStart)
+			setArmScales(1F + (MathHelper.cos(distance + Quarter) - 1F) * 0.15F * walkFactor,
+					1F + (MathHelper.cos(distance - Quarter) - 1F) * 0.15F * walkFactor);
+	}
 
-	public void animateHeadRotation(float viewHorizontalAngelOffset, float viewVerticalAngelOffset) {
+	public void animateHeadRotation(float viewHorizontalAngleOffset, float viewVerticalAngleOffset) {
 		bipedNeck.ignoreBase = true;
-		bipedHead.rotateAngleY = (actualRotation + viewHorizontalAngelOffset) / RenderUtilities.RadiantToAngle;
-		bipedHead.rotateAngleX = viewVerticalAngelOffset / RenderUtilities.RadiantToAngle;
+		bipedHead.rotateAngleY = (actualRotation + viewHorizontalAngleOffset) / RenderUtilities.RadiantToAngle;
+		bipedHead.rotateAngleX = viewVerticalAngleOffset / RenderUtilities.RadiantToAngle;
 	}
 
 	public void animateSleeping() {
@@ -507,10 +584,62 @@ public class SmartModel {
 
 		return null;
 	}
+	
+	private void setArmScales(float rightScale, float leftScale) {
+		if (scaleArmType == Scale) {
+			bipedRightArm.scaleY = rightScale;
+			bipedLeftArm.scaleY = leftScale;
+		} else if (scaleArmType == NoScaleEnd) {
+			bipedRightArm.offsetY -= (1F - rightScale) * 0.5F;
+			bipedLeftArm.offsetY -= (1F - leftScale) * 0.5F;
+		}
+	}
+	
+	private void setLegScales(float rightScale, float leftScale) {
+		if (scaleLegType == Scale) {
+			bipedRightLeg.scaleY = rightScale;
+			bipedLeftLeg.scaleY = leftScale;
+		} else if (scaleLegType == NoScaleEnd) {
+			bipedRightLeg.offsetY -= (1F - rightScale) * 0.5F;
+			bipedLeftLeg.offsetY -= (1F - leftScale) * 0.5F;
+		}
+	}
 
 	private static boolean canBeRandomBoxSource(ModelRenderer renderer) {
 		return renderer.cubeList != null && renderer.cubeList.size() > 0
 				&& (!(renderer instanceof SmartModelRotationRenderer)
 						|| ((SmartModelRotationRenderer) renderer).canBeRandomBoxSource());
+	}
+	
+	private static float Factor(float x, float x0, float x1) {
+		if (x0 > x1) {
+			if (x <= x1)
+				return 1F;
+			if (x >= x0)
+				return 0F;
+			return (x0 - x) / (x0 - x1);
+		} else {
+			if (x >= x1)
+				return 1F;
+			if (x <= x0)
+				return 0F;
+			return (x - x0) / (x1 - x0);
+		}
+	}
+	
+	private static float Between(float min, float max, float value) {
+		if (value < min)
+			return min;
+		if (value > max)
+			return max;
+		return value;
+	}
+
+	private static float Normalize(float radiant) {
+		while (radiant > Half)
+			radiant -= Whole;
+		while (radiant < -Half)
+			radiant += Whole;
+		return radiant;
 	}
 }

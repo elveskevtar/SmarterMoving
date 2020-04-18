@@ -52,33 +52,6 @@ public class SmartRenderPlayerBase extends RenderPlayerBase {
 		super.doRender(entityPlayer, d, d1, d2, f, renderPartialTicks);
 	}
 	
-	@Override
-	public void rotateCorpse(AbstractClientPlayer entityplayer, float totalTime, float actualRotation, float f2) {
-		getSmartRender().rotateCorpse(entityplayer, totalTime, actualRotation, f2);
-	}
-
-	public void superRotateCorpse(AbstractClientPlayer entityplayer, float totalTime, float actualRotation, float f2) {
-		super.rotateCorpse(entityplayer, totalTime, actualRotation, f2);
-	}
-	
-	@Override
-	public void renderLivingAt(AbstractClientPlayer entityplayer, double d, double d1, double d2) {
-		getSmartRender().renderLivingAt(entityplayer, d, d1, d2);
-	}
-
-	public void superRenderLivingAt(AbstractClientPlayer entityplayer, double d, double d1, double d2) {
-		super.renderLivingAt(entityplayer, d, d1, d2);
-	}
-	
-	@Override
-	public void renderName(AbstractClientPlayer entityplayer, double d, double d1, double d2) {
-		getSmartRender().renderName(entityplayer, d, d1, d2);
-	}
-
-	public void superRenderName(AbstractClientPlayer entityplayer, double d, double d1, double d2) {
-		super.renderName(entityplayer, d, d1, d2);
-	}
-	
 	public RenderManager getMovingRenderManager() {
 		return renderPlayerAPI.getRenderManagerField();
 	}

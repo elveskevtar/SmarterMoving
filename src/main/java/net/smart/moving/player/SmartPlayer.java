@@ -15,9 +15,9 @@ import net.smart.moving.config.SmartOptions;
 import net.smart.moving.input.SmartInput;
 import net.smart.moving.network.SmartPacketHandler;
 import net.smart.moving.network.packet.StatePacket;
-import net.smart.moving.player.SMBase.State;
+import net.smart.moving.player.SmartBase.State;
 
-public class SmartPlayer extends SMBase {
+public class SmartPlayer extends SmartBase {
 	
 	protected static final SmartInput Input = SmartMovingContext.Input;
 	protected static final SmartOptions Options = SmartMovingContext.Options;
@@ -30,13 +30,9 @@ public class SmartPlayer extends SMBase {
 	}
 	
 	public static void onPlayerTick(EntityPlayer player) {
+		State state = null;
 		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
-		if (!player.hasCapability(SmartStateProvider.CAPABILITY_STATE, null))
-			return;
-		
-		ISmartStateHandler handler = player.getCapability(SmartStateProvider.CAPABILITY_STATE, null);
-		State state = State.getState(handler.getSmartState());
-		if (state == State.INVALID)
+		if ((state = SmartBase.getState(player)) == null || state == State.INVALID)
 			return;
 		
 		boolean grab = Input.isKeyDown(Options.grabKey);
@@ -50,7 +46,7 @@ public class SmartPlayer extends SMBase {
 			newState = State.CRAWL;
 		
 		if (newState != state) {
-			handler.setSmartState(newState.id);
+			SmartBase.setState(player, newState);
 			StatePacket packet = new StatePacket(player.getEntityId(), newState.id);
 			SmartPacketHandler.INSTANCE.sendToServer(packet);
 		}

@@ -25,7 +25,7 @@ import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.smart.moving.player.SMBase;
+import net.smart.moving.player.SmartBase;
 import net.smart.moving.player.SmartPlayerBase;
 
 public class SmartMovingFactory {
@@ -53,7 +53,7 @@ public class SmartMovingFactory {
 //		factory.doHandleMultiPlayerTick(minecraft);
 //	}
 
-	public static SMBase getInstance(EntityPlayer entityPlayer) {
+	public static SmartBase getInstance(EntityPlayer entityPlayer) {
 		return factory.doGetInstance(entityPlayer);
 	}
 
@@ -92,7 +92,7 @@ public class SmartMovingFactory {
 //		}
 //	}
 
-	protected SMBase doGetInstance(EntityPlayer entityPlayer) {
+	protected SmartBase doGetInstance(EntityPlayer entityPlayer) {
 //		if (entityPlayer instanceof EntityOtherPlayerMP)
 //			return doGetOtherSmartMoving(entityPlayer.getEntityId());
 //		else if (entityPlayer instanceof IEntityPlayerSP)

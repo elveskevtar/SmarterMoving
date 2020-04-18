@@ -88,7 +88,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateHeadRotation(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateHeadRotation(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateHeadRotation(viewHorizontalAngelOffset, viewVerticalAngelOffset);
 	}
@@ -99,7 +99,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateSleeping(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateSleeping(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateSleeping();
 	}
@@ -110,7 +110,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateArmSwinging(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateArmSwinging(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateArmSwinging(totalHorizontalDistance, currentHorizontalSpeed);
 	}
@@ -121,7 +121,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateRiding(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateRiding(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateRiding();
 	}
@@ -132,7 +132,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateLeftArmItemHolding(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateLeftArmItemHolding(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateLeftArmItemHolding();
 	}
@@ -143,7 +143,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				currentHorizontalSpeed, totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateRightArmItemHolding(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateRightArmItemHolding(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateRightArmItemHolding();
 	}
@@ -154,7 +154,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateWorkingBody(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateWorkingBody(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateWorkingBody();
 	}
@@ -165,7 +165,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateWorkingArms(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateWorkingArms(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateWorkingArms();
 	}
@@ -176,7 +176,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateSneaking(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateSneaking(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateSneaking();
 	}
@@ -187,7 +187,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateArms(float totalHorizontalDistance, float currentHorizontalSpeed, float totalTime,
+	public void dynamicOverrideAnimateArms(float totalHorizontalDistance, float currentHorizontalSpeed, float totalTime,
 			float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateArms(totalTime);
 	}
@@ -198,7 +198,7 @@ public class SmartModelPlayerBase extends ModelPlayerBase {
 				totalTime, viewHorizontalAngelOffset, viewVerticalAngelOffset, factor });
 	}
 
-	public void dynamicVirtualAnimateBowAiming(float totalHorizontalDistance, float currentHorizontalSpeed,
+	public void dynamicOverrideAnimateBowAiming(float totalHorizontalDistance, float currentHorizontalSpeed,
 			float totalTime, float viewHorizontalAngelOffset, float viewVerticalAngelOffset, float factor) {
 		getRenderModel().animateBowAiming(totalTime);
 	}

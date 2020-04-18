@@ -5,7 +5,7 @@ import net.smart.moving.SmartMoving;
 import net.smart.moving.capabilities.ISmartStateHandler;
 import net.smart.moving.capabilities.SmartStateProvider;
 
-public class SmartServer extends SMBase {
+public class SmartServer extends SmartBase {
 	
 	private SmartServerPlayerBase base;
 
