@@ -30,6 +30,7 @@ public abstract class SmartBase {
 	}
 	
 	private static final float defaultHeight = 1.8F;
+	private static final float sneakHeight = 1.65F;
 	private static final float crawlHeight = 0.65F;
 	private static final float crawlEyeHeight = 0.5F;
 	private static final float crawlDampingFactor = 0.3F;
@@ -48,6 +49,8 @@ public abstract class SmartBase {
 		if (state == State.IDLE) {
 			player.height = defaultHeight;
 			player.eyeHeight = player.getDefaultEyeHeight();
+		} else if (state == State.SNEAK) {
+			player.height = sneakHeight;
 		} else if (state == State.CRAWL) {
 			setHorizontalDamping(crawlDampingFactor);
 			player.height = crawlHeight;
