@@ -9,6 +9,7 @@ import api.player.render.RenderPlayerAPI;
 import api.player.render.RenderPlayerBaseSorting;
 import api.player.server.ServerPlayerAPI;
 import net.minecraft.entity.Entity;
+import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -73,6 +74,11 @@ public class SmartMoving {
     public void onPlayerTick(TickEvent.PlayerTickEvent event) {
     	if (event.phase == Phase.START && event.player.world.isRemote)
     		SmartPlayer.onPlayerTick(event.player);
+    }
+    
+    @SubscribeEvent
+    public void onInput(InputUpdateEvent event) {
+    	SmartPlayer.onPlayerInput(event);
     }
     
     private void playerAPI_register() {

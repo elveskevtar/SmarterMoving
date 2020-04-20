@@ -1,22 +1,14 @@
 package net.smart.moving.player;
 
-import java.util.HashMap;
-
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.smart.moving.SmartMoving;
+import net.minecraftforge.client.event.InputUpdateEvent;
 import net.smart.moving.SmartMovingContext;
-import net.smart.moving.capabilities.ISmartStateHandler;
-import net.smart.moving.capabilities.SmartStateProvider;
 import net.smart.moving.config.SmartOptions;
 import net.smart.moving.input.SmartInput;
 import net.smart.moving.network.SmartPacketHandler;
 import net.smart.moving.network.packet.StatePacket;
-import net.smart.moving.player.SmartBase.State;
 
 public class SmartPlayer extends SmartBase {
 	
@@ -31,9 +23,9 @@ public class SmartPlayer extends SmartBase {
 	}
 	
 	public static void onPlayerTick(EntityPlayer player) {
-		State state = null;
+		State state = SmartBase.getState(player);
 		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
-		if ((state = SmartBase.getState(player)) == null || state == State.INVALID)
+		if (state == null || state == State.INVALID)
 			return;
 		
 		boolean sneak = Input.isKeyDown(Minecraft.getMinecraft().gameSettings.keyBindSneak);
@@ -55,6 +47,26 @@ public class SmartPlayer extends SmartBase {
 			SmartBase.setState(player, newState);
 			StatePacket packet = new StatePacket(player.getEntityId(), newState.id);
 			SmartPacketHandler.INSTANCE.sendToServer(packet);
+		}
+	}
+	
+	public static void onPlayerInput(InputUpdateEvent event) {
+		EntityPlayer player = event.getEntityPlayer();
+		State state = SmartBase.getState(player);
+		if (state == null || state == State.INVALID)
+			return;
+		
+		/* fix sneaking when need to crawl */
+		int entHeight = Math.max(Math.round(player.height), 1);
+		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
+		if (state == State.CRAWL && !smartPlayer.isHeadspaceFree(player.getPosition(), entHeight)) {
+			if (event.getMovementInput().sneak == false) {
+				player.setSneaking(true);
+				event.getMovementInput().sneak = true;
+				event.getMovementInput().moveStrafe *= 0.3F;
+				event.getMovementInput().moveForward *= 0.3F;
+			}
+			System.out.println("sneak: " + event.getMovementInput().sneak);
 		}
 	}
 }
