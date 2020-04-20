@@ -16,7 +16,7 @@ file "build.properties" withReader {
     ext.config = new ConfigSlurper().parse prop
 }
 
-version = "1.0"
+version = "${config.smartmoving.version}"
 group = "net.smart" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "SmartMoving"
 
