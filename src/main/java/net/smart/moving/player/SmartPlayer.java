@@ -3,6 +3,7 @@ package net.smart.moving.player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.smart.moving.SmartMovingContext;
 import net.smart.moving.config.SmartOptions;
@@ -32,7 +33,6 @@ public class SmartPlayer extends SmartBase {
 		boolean grab = Input.isKeyDown(Options.grabKey);
 		
 		State newState = State.IDLE;
-		int entHeight = Math.max(Math.round(player.height), 1);
 		
 		if (sneak)
 			newState = State.SNEAK;
@@ -40,7 +40,7 @@ public class SmartPlayer extends SmartBase {
 			newState = State.CRAWL;
 		
 		if (state == State.CRAWL && newState != State.CRAWL &&
-				!smartPlayer.isHeadspaceFree(player.getPosition(), entHeight))
+				!smartPlayer.isHeadspaceFree(smartPlayer.getBlockPos(), 1))
 			newState = State.CRAWL;
 		
 		if (newState != state) {
@@ -57,16 +57,14 @@ public class SmartPlayer extends SmartBase {
 			return;
 		
 		/* fix sneaking when need to crawl */
-		int entHeight = Math.max(Math.round(player.height), 1);
 		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
-		if (state == State.CRAWL && !smartPlayer.isHeadspaceFree(player.getPosition(), entHeight)) {
+		if (state == State.CRAWL && !smartPlayer.isHeadspaceFree(smartPlayer.getBlockPos(), 1)) {
 			if (event.getMovementInput().sneak == false) {
 				player.setSneaking(true);
 				event.getMovementInput().sneak = true;
 				event.getMovementInput().moveStrafe *= 0.3F;
 				event.getMovementInput().moveForward *= 0.3F;
 			}
-			System.out.println("sneak: " + event.getMovementInput().sneak);
 		}
 	}
 }

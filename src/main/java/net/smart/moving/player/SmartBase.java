@@ -4,21 +4,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import net.smart.moving.SmartMovingContext;
 import net.smart.moving.capabilities.ISmartStateHandler;
 import net.smart.moving.capabilities.SmartStateProvider;
-import net.smart.moving.config.SmartOptions;
-import net.smart.moving.input.SmartInput;
-import net.smart.moving.network.SmartPacketHandler;
-import net.smart.moving.network.packet.StatePacket;
-import net.smart.moving.player.SmartBase.State;
-import net.smart.moving.utilities.RenderUtilities;
 
 public abstract class SmartBase {
 	
@@ -151,6 +141,10 @@ public abstract class SmartBase {
 			if (!isOpenBlockSpace(pos.add(0, y, 0)))
 				return false;
 		return true;
+	}
+	
+	protected BlockPos getBlockPos() {
+		return new BlockPos(Math.floor(player.posX), player.posY, Math.floor(player.posZ));
 	}
 	
 	public static State getState(Entity entity) {
