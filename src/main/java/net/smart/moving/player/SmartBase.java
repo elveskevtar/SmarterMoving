@@ -21,7 +21,7 @@ import net.smart.moving.utilities.RenderUtilities;
 public abstract class SmartBase {
 	
 	public static enum State {
-		INVALID(-1), IDLE(0), CRAWL(1);
+		INVALID(-1), IDLE(0), SNEAK(1), CRAWL(2);
 		
 		public final byte id;
 		
@@ -40,6 +40,7 @@ public abstract class SmartBase {
 	private static final float defaultHeight = 1.8F;
 	private static final float crawlHeight = 0.65F;
 	private static final float crawlEyeHeight = 0.5F;
+	private static final float crawlDampingFactor = 0.3F;
 	
 	protected EntityPlayer player;
 	
@@ -56,6 +57,7 @@ public abstract class SmartBase {
 			player.height = defaultHeight;
 			player.eyeHeight = player.getDefaultEyeHeight();
 		} else if (state == State.CRAWL) {
+			setHorizontalDamping(crawlDampingFactor);
 			player.height = crawlHeight;
 			player.eyeHeight = crawlEyeHeight;
 		}
@@ -64,13 +66,13 @@ public abstract class SmartBase {
 		updatePlayerRotations(state);
 	}
 	
-	private void updatePlayerRotations(State state) {
+	protected void updatePlayerRotations(State state) {
         double diffPosX = player.posX - player.prevPosX;
         double diffPosY = player.posZ - player.prevPosZ;
         float x2y2 = (float) (diffPosX * diffPosX + diffPosY * diffPosY);
         float yawOffset = player.renderYawOffset;
 
-        if (x2y2 > 0.0025000002F) {
+        if (x2y2 > 0) {
             float moveDir = (float) MathHelper.atan2(diffPosY, diffPosX) * (180F / (float)Math.PI) - 90.0F;
             float yawMoveDiff = MathHelper.abs(MathHelper.wrapDegrees(player.rotationYaw) - moveDir);
 
@@ -121,6 +123,11 @@ public abstract class SmartBase {
 
         while (player.rotationYawHead - player.prevRotationYawHead >= 180.0F)
         	player.prevRotationYawHead += 360.0F;
+	}
+	
+	protected void setHorizontalDamping(float horizontalDamping) {
+		player.motionX *= horizontalDamping;
+		player.motionZ *= horizontalDamping;
 	}
 
 	protected void updateBoundingBox() {

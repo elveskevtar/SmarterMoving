@@ -249,6 +249,11 @@ public class SmartModel {
 						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
 						factor, entity);
 				break;
+			case SNEAK:
+				animateStandard(totalHorizontalDistance, currentHorizontalSpeed,
+						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
+						factor, entity);
+				break;
 			case CRAWL:
 				animateCrawling(totalHorizontalDistance, currentHorizontalSpeed,
 						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,

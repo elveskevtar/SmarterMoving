@@ -3,6 +3,7 @@ package net.smart.moving.player;
 import java.util.HashMap;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -35,12 +36,17 @@ public class SmartPlayer extends SmartBase {
 		if ((state = SmartBase.getState(player)) == null || state == State.INVALID)
 			return;
 		
+		boolean sneak = Input.isKeyDown(Minecraft.getMinecraft().gameSettings.keyBindSneak);
 		boolean grab = Input.isKeyDown(Options.grabKey);
 		
 		State newState = State.IDLE;
 		int entHeight = Math.max(Math.round(player.height), 1);
-		if (player.isSneaking() && grab)
+		
+		if (sneak)
+			newState = State.SNEAK;
+		if (sneak && grab)
 			newState = State.CRAWL;
+		
 		if (state == State.CRAWL && newState != State.CRAWL &&
 				!smartPlayer.isHeadspaceFree(player.getPosition(), entHeight))
 			newState = State.CRAWL;
