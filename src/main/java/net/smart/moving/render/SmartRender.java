@@ -1,15 +1,17 @@
 package net.smart.moving.render;
 
+import static net.smart.moving.utilities.RenderUtilities.Half;
+import static net.smart.moving.utilities.RenderUtilities.Quarter;
+import static net.smart.moving.utilities.RenderUtilities.RadiantToAngle;
+import static net.smart.moving.utilities.RenderUtilities.Whole;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.util.math.MathHelper;
 import net.smart.moving.SmartMovingFactory;
 import net.smart.moving.model.SmartModel;
 import net.smart.moving.model.SmartModelPlayerBase;
 import net.smart.moving.player.SmartBase;
-import net.smart.moving.player.SmartBase.State;
-import net.smart.moving.player.SmartPlayerBase;
 
 public class SmartRender {
 	
@@ -42,14 +44,38 @@ public class SmartRender {
 		SmartBase moving = SmartMovingFactory.getInstance(entityplayer);
 		if (moving != null) {
 			boolean isInventory = d == 0.0F && d1 == 0.0F && d2 == 0.0F && f == 0.0F && renderPartialTicks == 1.0F;
-
-			SmartBase.State state = SmartBase.getState(entityplayer);
-
+			if (!isInventory) {
+				double diffX = entityplayer.posX - entityplayer.prevPosX;
+				double diffY = entityplayer.posY - entityplayer.prevPosY;
+				double diffZ = entityplayer.posZ - entityplayer.prevPosZ;
+				float horizontalMove = MathHelper.sqrt(diffX * diffX + diffZ * diffZ);
+				float verticalAngle = (float) Math.atan2(diffY, horizontalMove);
+				if (Float.isNaN(verticalAngle) || horizontalMove <= 0.08)
+					verticalAngle = diffY < 0 ? -Quarter : Quarter;
+				float cameraAngle = entityplayer.rotationYaw / RadiantToAngle;
+				float forwardRotation = moving.forwardRotation / RadiantToAngle;
+				float horizontalAngle = 0;
+				if (horizontalMove >= 0.08) {
+					horizontalAngle = (float) Math.atan2(diffZ, diffX) - forwardRotation - Quarter;
+					if (Float.isNaN(horizontalAngle) || diffX == 0 || diffZ == 0)
+						horizontalAngle = moving.horizontalAngle;				
+					while (horizontalAngle - moving.horizontalAngle > Half)
+						horizontalAngle -= Whole;
+					while (horizontalAngle - moving.horizontalAngle < -Half)
+						horizontalAngle += Whole;
+				}
+				
+				moving.currentSpeed = MathHelper.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2) + Math.pow(diffZ, 2));
+				moving.forwardRotation = entityplayer.prevRotationYaw + (entityplayer.rotationYaw - entityplayer.prevRotationYaw) * renderPartialTicks;
+				moving.verticalAngle += (verticalAngle - moving.verticalAngle) * 0.1F;
+				moving.horizontalAngle += (horizontalAngle - moving.horizontalAngle) * 0.1F;
+				moving.totalDistance += moving.currentSpeed * renderPartialTicks;
+			}
+			
 			playerModels = base.getRenderModels();
-
 			for (SmartModelPlayerBase model : playerModels) {
 				SmartModel playerModel = model.getRenderModel();
-				playerModel.state = state;
+				playerModel.state = SmartBase.getState(entityplayer);
 			}
 		}
 		

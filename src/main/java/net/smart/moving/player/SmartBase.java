@@ -1,7 +1,6 @@
 package net.smart.moving.player;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -9,11 +8,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.smart.moving.capabilities.ISmartStateHandler;
 import net.smart.moving.capabilities.SmartStateProvider;
+import net.smart.moving.utilities.RenderUtilities;
 
 public abstract class SmartBase {
 	
 	public static enum State {
-		INVALID(-1), IDLE(0), SNEAK(1), CRAWL(2);
+		INVALID(-1), IDLE(0), SNEAK(1), CRAWL(2), FLY(3), ELYTRA(4);
 		
 		public final byte id;
 		
@@ -29,13 +29,20 @@ public abstract class SmartBase {
 		}
 	}
 	
-	private static final float defaultHeight = 1.8F;
-	private static final float sneakHeight = 1.65F;
-	private static final float crawlHeight = 0.65F;
-	private static final float crawlEyeHeight = 0.5F;
-	private static final float crawlDampingFactor = 0.3F;
+	protected static final float defaultHeight = 1.8F;
+	protected static final float sneakHeight = 1.65F;
+	protected static final float crawlHeight = 0.65F;
+	protected static final float crawlEyeHeight = 0.5F;
+	protected static final float crawlDampingFactor = 0.3F;
+	protected static final float flySpeedFactor = 0.5F;
 	
 	protected EntityPlayer player;
+	
+	public float currentSpeed;
+	public float forwardRotation;
+	public float verticalAngle;
+	public float horizontalAngle;
+	public float totalDistance;
 	
 	public SmartBase(EntityPlayer player) {
 		this.player = player;
@@ -55,69 +62,93 @@ public abstract class SmartBase {
 			setHorizontalDamping(crawlDampingFactor);
 			player.height = crawlHeight;
 			player.eyeHeight = crawlEyeHeight;
+		} else if (state == State.FLY) {
+			player.height = defaultHeight;
+			player.eyeHeight = player.getDefaultEyeHeight();
 		}
 		
 		updateBoundingBox();
 		updatePlayerRotations(state);
 	}
 	
+	protected void moveFlying(float vertical, float strafing, float forward, float speedFactor, boolean threeDimensional) {
+		float diffMotionXStrafing = 0, diffMotionXForward = 0, diffMotionZStrafing = 0, diffMotionZForward = 0;
+		float horizontalTotal = MathHelper.sqrt(strafing * strafing + forward * forward);
+		if(horizontalTotal >= 0.01F) {
+			if(horizontalTotal < 1.0F)
+				horizontalTotal = 1.0F;
+
+			float moveStrafingFactor = strafing / horizontalTotal;
+			float moveForwardFactor = forward / horizontalTotal;
+			float sin = MathHelper.sin((float) (player.rotationYaw * Math.PI / 180F));
+			float cos = MathHelper.cos((float) (player.rotationYaw * Math.PI / 180F));
+			diffMotionXStrafing = moveStrafingFactor * cos;
+			diffMotionXForward = -moveForwardFactor * sin;
+			diffMotionZStrafing = moveStrafingFactor * sin;
+			diffMotionZForward = moveForwardFactor * cos;
+		}
+
+		float rotation = threeDimensional ? player.rotationPitch / RenderUtilities.RadiantToAngle : 0;
+		float divingHorizontalFactor = MathHelper.cos(rotation);
+		float divingVerticalFactor = -MathHelper.sin(rotation) * Math.signum(forward);
+
+		float diffMotionX = diffMotionXForward * divingHorizontalFactor + diffMotionXStrafing;
+		float diffMotionY = MathHelper.sqrt(diffMotionXForward * diffMotionXForward + diffMotionZForward * diffMotionZForward) * divingVerticalFactor + vertical;
+		float diffMotionZ = diffMotionZForward * divingHorizontalFactor + diffMotionZStrafing;
+
+		float total = MathHelper.sqrt(MathHelper.sqrt(diffMotionX * diffMotionX + diffMotionZ * diffMotionZ) + diffMotionY * diffMotionY);
+		if(total > 0.01F) {
+			float factor = speedFactor / total;
+			player.motionX = diffMotionX * factor;
+			player.motionY = diffMotionY * factor;
+			player.motionZ = diffMotionZ * factor;
+		}
+	}
+	
 	protected void updatePlayerRotations(State state) {
-        double diffPosX = player.posX - player.prevPosX;
-        double diffPosY = player.posZ - player.prevPosZ;
-        float x2y2 = (float) (diffPosX * diffPosX + diffPosY * diffPosY);
-        float yawOffset = player.renderYawOffset;
+		switch (state) {
+		case CRAWL:
+	        double diffPosX = player.posX - player.prevPosX;
+	        double diffPosZ = player.posZ - player.prevPosZ;
+	        float horizontalMove = (float) Math.sqrt(diffPosX * diffPosX + diffPosZ * diffPosZ);
+	        float yawOffset = player.rotationYaw;
+	        
+	        if (horizontalMove > 0) {
+	            float moveDir = (float) (MathHelper.atan2(diffPosZ, diffPosX) * 180F / Math.PI - 90.0F);
+	            float yawMoveDiff = MathHelper.abs(MathHelper.wrapDegrees(player.rotationYaw) - moveDir);
 
-        if (x2y2 > 0) {
-            float moveDir = (float) MathHelper.atan2(diffPosY, diffPosX) * (180F / (float)Math.PI) - 90.0F;
-            float yawMoveDiff = MathHelper.abs(MathHelper.wrapDegrees(player.rotationYaw) - moveDir);
+	            if (95.0F < yawMoveDiff && yawMoveDiff < 265.0F && state != State.CRAWL)
+	                yawOffset = moveDir - 180.0F;
+	            else
+	                yawOffset = moveDir;
+	        }
 
-            if (95.0F < yawMoveDiff && yawMoveDiff < 265.0F && state != State.CRAWL)
-                yawOffset = moveDir - 180.0F;
-            else
-                yawOffset = moveDir;
-        }
+	        if (player.swingProgress > 0.0F)
+	            yawOffset = player.rotationYaw;
+	        
+	        float f = MathHelper.wrapDegrees(yawOffset - player.renderYawOffset);
+	        player.renderYawOffset += f * 0.3F;
+	        float f1 = MathHelper.wrapDegrees(player.rotationYaw - player.renderYawOffset);
 
-        if (player.swingProgress > 0.0F)
-            yawOffset = player.rotationYaw;
-        
-        float f = MathHelper.wrapDegrees(yawOffset - player.renderYawOffset);
-        player.renderYawOffset += f * 0.3F;
-        float f1 = MathHelper.wrapDegrees(player.rotationYaw - player.renderYawOffset);
+	        if (f1 < -75.0F)
+	            f1 = -75.0F;
 
-        if (f1 < -75.0F)
-            f1 = -75.0F;
+	        if (f1 >= 75.0F)
+	            f1 = 75.0F;
 
-        if (f1 >= 75.0F)
-            f1 = 75.0F;
+	        player.renderYawOffset = player.rotationYaw - f1;
 
-        player.renderYawOffset = player.rotationYaw - f1;
+	        if (f1 * f1 > 2500.0F)
+	        	player.renderYawOffset += f1 * 0.2F;
+			break;
+		case FLY:
+			player.renderYawOffset = forwardRotation;
+			break;
+		default:
+			break;
+		}
 
-        if (f1 * f1 > 2500.0F)
-        	player.renderYawOffset += f1 * 0.2F;
-
-        while (player.rotationYaw - player.prevRotationYaw < -180.0F)
-        	player.prevRotationYaw -= 360.0F;
-
-        while (player.rotationYaw - player.prevRotationYaw >= 180.0F)
-        	player.prevRotationYaw += 360.0F;
-
-        while (player.renderYawOffset - player.prevRenderYawOffset < -180.0F)
-        	player.prevRenderYawOffset -= 360.0F;
-
-        while (player.renderYawOffset - player.prevRenderYawOffset >= 180.0F)
-        	player.prevRenderYawOffset += 360.0F;
-
-        while (player.rotationPitch - player.prevRotationPitch < -180.0F)
-        	player.prevRotationPitch -= 360.0F;
-
-        while (player.rotationPitch - player.prevRotationPitch >= 180.0F)
-        	player.prevRotationPitch += 360.0F;
-
-        while (player.rotationYawHead - player.prevRotationYawHead < -180.0F)
-        	player.prevRotationYawHead -= 360.0F;
-
-        while (player.rotationYawHead - player.prevRotationYawHead >= 180.0F)
-        	player.prevRotationYawHead += 360.0F;
+        wrapRotations();
 	}
 	
 	protected void setHorizontalDamping(float horizontalDamping) {
@@ -148,6 +179,32 @@ public abstract class SmartBase {
 	
 	protected BlockPos getBlockPos() {
 		return new BlockPos(Math.floor(player.posX), player.posY, Math.floor(player.posZ));
+	}
+	
+	private void wrapRotations() {
+        while (player.rotationYaw - player.prevRotationYaw < -180.0F)
+        	player.prevRotationYaw -= 360.0F;
+
+        while (player.rotationYaw - player.prevRotationYaw >= 180.0F)
+        	player.prevRotationYaw += 360.0F;
+
+        while (player.renderYawOffset - player.prevRenderYawOffset < -180.0F)
+        	player.prevRenderYawOffset -= 360.0F;
+
+        while (player.renderYawOffset - player.prevRenderYawOffset >= 180.0F)
+        	player.prevRenderYawOffset += 360.0F;
+
+        while (player.rotationPitch - player.prevRotationPitch < -180.0F)
+        	player.prevRotationPitch -= 360.0F;
+
+        while (player.rotationPitch - player.prevRotationPitch >= 180.0F)
+        	player.prevRotationPitch += 360.0F;
+
+        while (player.rotationYawHead - player.prevRotationYawHead < -180.0F)
+        	player.prevRotationYawHead -= 360.0F;
+
+        while (player.rotationYawHead - player.prevRotationYawHead >= 180.0F)
+        	player.prevRotationYawHead += 360.0F;
 	}
 	
 	public static State getState(Entity entity) {

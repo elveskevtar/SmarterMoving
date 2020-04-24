@@ -21,6 +21,19 @@ public class SmartPlayerBase extends ClientPlayerBase {
 		smartPlayer.afterOnUpdate();
 	}
 	
+	@Override
+	public void moveEntityWithHeading(float strafing, float vertical, float forward) {
+		smartPlayer.moveEntityWithHeading(strafing, vertical, forward);
+	}
+	
+	public void superMoveEntityWithHeading(float strafing, float vertical, float forward) {
+		super.moveEntityWithHeading(strafing, vertical, forward);
+	}
+	
+	public boolean getJumpField() {
+		return playerAPI.getIsJumpingField();
+	}
+	
 	public Minecraft getMCField() {
 		return playerAPI.getMcField();
 	}

@@ -10,6 +10,7 @@ import net.smart.moving.config.SmartOptions;
 import net.smart.moving.input.SmartInput;
 import net.smart.moving.network.SmartPacketHandler;
 import net.smart.moving.network.packet.StatePacket;
+import net.smart.moving.player.SmartBase.State;
 
 public class SmartPlayer extends SmartBase {
 	
@@ -21,6 +22,16 @@ public class SmartPlayer extends SmartBase {
 	public SmartPlayer(SmartPlayerBase base, EntityPlayer player) {
 		super(player);
 		this.base = base;
+	}
+	
+	public void moveEntityWithHeading(float strafing, float vertical, float forward) {
+		State state = getState(player);
+		if (state == null || state == State.INVALID)
+			return;
+		
+		if (state == State.FLY)
+			moveFlying(vertical, strafing, forward, flySpeedFactor, true);
+		base.superMoveEntityWithHeading(strafing, vertical, forward);
 	}
 	
 	public static void onPlayerTick(EntityPlayer player) {
@@ -36,12 +47,19 @@ public class SmartPlayer extends SmartBase {
 		
 		if (sneak)
 			newState = State.SNEAK;
+		
 		if (sneak && grab)
 			newState = State.CRAWL;
 		
 		if (state == State.CRAWL && newState != State.CRAWL &&
 				!smartPlayer.isHeadspaceFree(smartPlayer.getBlockPos(), 1))
 			newState = State.CRAWL;
+		
+		if (player.capabilities.isFlying)
+			newState = State.FLY;
+		
+		if (player.isElytraFlying())
+			newState = State.ELYTRA;
 		
 		if (newState != state) {
 			SmartBase.setState(player, newState);

@@ -35,6 +35,7 @@ import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelBiped.ArmPose;
 import net.minecraft.client.model.ModelBox;
@@ -43,6 +44,9 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.smart.moving.player.SmartBase;
+import net.smart.moving.player.SmartPlayer;
+import net.smart.moving.player.SmartPlayerBase;
+import net.smart.moving.player.SmartBase.State;
 import net.smart.moving.render.SmartModelCapeRenderer;
 import net.smart.moving.render.SmartModelEarsRenderer;
 import net.smart.moving.render.SmartModelRotationRenderer;
@@ -59,7 +63,6 @@ public class SmartModel {
 
 	private boolean isModelPlayer;
 	private boolean smallArms;
-
 
 	public SmartModelRotationRenderer bipedOuter;
 	public SmartModelRotationRenderer bipedTorso;
@@ -241,7 +244,7 @@ public class SmartModel {
 	public void setRotationAngles(float totalHorizontalDistance, float currentHorizontalSpeed, float totalTime,
 			float viewHorizontalAngleOffset, float viewVerticalAngleOffset, float factor, Entity entity) {
 		reset();
-
+		
 		if (state != null) {
 			switch (state) {
 			case IDLE:
@@ -256,6 +259,16 @@ public class SmartModel {
 				break;
 			case CRAWL:
 				animateCrawling(totalHorizontalDistance, currentHorizontalSpeed,
+						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
+						factor, entity);
+				break;
+			case FLY:
+				animateFlying(totalHorizontalDistance, currentHorizontalSpeed,
+						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
+						factor, entity);
+				break;
+			case ELYTRA:
+				animateStandard(totalHorizontalDistance, currentHorizontalSpeed,
 						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
 						factor, entity);
 				break;
@@ -427,6 +440,38 @@ public class SmartModel {
 		if (scaleArmType != NoScaleStart)
 			setArmScales(1F + (MathHelper.cos(distance + Quarter) - 1F) * 0.15F * walkFactor,
 					1F + (MathHelper.cos(distance - Quarter) - 1F) * 0.15F * walkFactor);
+	}
+	
+	public void animateFlying(float totalHorizontalDistance, float currentHorizontalSpeed, float totalTime,
+			float viewHorizontalAngleOffset, float viewVerticalAngleOffset, float factor, Entity entity) {
+		SmartPlayerBase base = SmartPlayerBase.getPlayerBase((EntityPlayerSP) entity);
+		SmartPlayer player = base.getSmartPlayer();
+		float distance = player.totalDistance * 0.08F;
+		float walkFactor = Factor(currentHorizontalSpeed, 0F, 1F);
+		float standFactor = Factor(currentHorizontalSpeed, 1F, 0F);
+		float time = totalTime * 0.15F;
+
+		/* Rotate player body */
+		bipedOuter.fadeRotateAngleX = true;
+		bipedOuter.rotateAngleX = Quarter - player.verticalAngle;
+		bipedOuter.rotateAngleY = player.horizontalAngle;
+		
+		/* Rotate head */
+		bipedHead.rotateAngleX = -bipedOuter.rotateAngleX / 2F;
+
+		/* Rotate arms */
+		bipedRightArm.rotationOrder = SmartModelRotationRenderer.XZY;
+		bipedLeftArm.rotationOrder = SmartModelRotationRenderer.XZY;
+		bipedRightArm.rotateAngleY = (MathHelper.cos(time) * Sixteenth) * standFactor;
+		bipedLeftArm.rotateAngleY = (MathHelper.cos(time) * Sixteenth) * standFactor;
+		bipedRightArm.rotateAngleZ = (MathHelper.cos(distance + Half) * Sixtyfourth + (Half - Sixteenth)) * walkFactor + Quarter * standFactor;
+		bipedLeftArm.rotateAngleZ = (MathHelper.cos(distance) * Sixtyfourth - (Half - Sixteenth)) * walkFactor - Quarter * standFactor;
+		
+		/* Rotate legs */
+		bipedRightLeg.rotateAngleX = MathHelper.cos(distance) * Sixtyfourth * walkFactor + MathHelper.cos(time + Half) * Sixtyfourth * standFactor;
+		bipedLeftLeg.rotateAngleX = MathHelper.cos(distance + Half) * Sixtyfourth * walkFactor + MathHelper.cos(time) * Sixtyfourth * standFactor;
+		bipedRightLeg.rotateAngleZ = Sixtyfourth;
+		bipedLeftLeg.rotateAngleZ = -Sixtyfourth;
 	}
 
 	public void animateHeadRotation(float viewHorizontalAngleOffset, float viewVerticalAngleOffset) {
