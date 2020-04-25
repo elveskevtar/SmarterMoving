@@ -1,5 +1,8 @@
 package net.smart.moving.player;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,6 +31,8 @@ public abstract class SmartBase {
 			return State.INVALID;
 		}
 	}
+	
+	private Set<BlockPos> boundingBlocks = new HashSet<BlockPos>();
 	
 	protected static final float defaultHeight = 1.8F;
 	protected static final float sneakHeight = 1.65F;
@@ -158,9 +163,15 @@ public abstract class SmartBase {
 
 	protected void updateBoundingBox() {
 		final double d0 = player.width / 2.0D;
-		final AxisAlignedBB aabb = player.getEntityBoundingBox();
+		AxisAlignedBB aabb = player.getEntityBoundingBox();
 		player.setEntityBoundingBox(new AxisAlignedBB(player.posX - d0, aabb.minY,
 				player.posZ - d0, player.posX + d0, aabb.minY + player.height, player.posZ + d0));
+		
+		boundingBlocks.clear();
+		aabb = player.getEntityBoundingBox();
+		for (int x = (int)Math.floor(aabb.minX); x <= (int)Math.floor(aabb.maxX); x++)
+			for (int z = (int)Math.floor(aabb.minZ); z <= (int)Math.floor(aabb.maxZ); z++)
+				boundingBlocks.add(new BlockPos(x, (int)player.posY, z));
 	}
 	
 	protected boolean isOpenBlockSpace(BlockPos pos) {
@@ -170,9 +181,9 @@ public abstract class SmartBase {
 				&& !upBlockState.getBlock().isNormalCube(upBlockState, player.world, pos.up());
 	}
 	
-	protected boolean isHeadspaceFree(BlockPos pos, int height) {
-		for (int y = 0; y < height; y++)
-			if (!isOpenBlockSpace(pos.add(0, y, 0)))
+	protected boolean isHeadspaceFree() {
+		for (BlockPos pos : boundingBlocks)
+			if (!isOpenBlockSpace(pos))
 				return false;
 		return true;
 	}

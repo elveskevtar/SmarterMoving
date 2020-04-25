@@ -51,8 +51,7 @@ public class SmartPlayer extends SmartBase {
 		if (sneak && grab)
 			newState = State.CRAWL;
 		
-		if (state == State.CRAWL && newState != State.CRAWL &&
-				!smartPlayer.isHeadspaceFree(smartPlayer.getBlockPos(), 1))
+		if (state == State.CRAWL && newState != State.CRAWL && !smartPlayer.isHeadspaceFree())
 			newState = State.CRAWL;
 		
 		if (player.capabilities.isFlying)
@@ -76,7 +75,7 @@ public class SmartPlayer extends SmartBase {
 		
 		/* fix sneaking when need to crawl */
 		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
-		if (state == State.CRAWL && !smartPlayer.isHeadspaceFree(smartPlayer.getBlockPos(), 1)) {
+		if (state == State.CRAWL && !smartPlayer.isHeadspaceFree()) {
 			if (event.getMovementInput().sneak == false) {
 				player.setSneaking(true);
 				event.getMovementInput().sneak = true;
