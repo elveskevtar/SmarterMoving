@@ -46,7 +46,6 @@ import net.minecraft.util.math.MathHelper;
 import net.smart.moving.player.SmartBase;
 import net.smart.moving.player.SmartPlayer;
 import net.smart.moving.player.SmartPlayerBase;
-import net.smart.moving.player.SmartBase.State;
 import net.smart.moving.render.SmartModelCapeRenderer;
 import net.smart.moving.render.SmartModelEarsRenderer;
 import net.smart.moving.render.SmartModelRotationRenderer;
@@ -677,6 +676,7 @@ public class SmartModel {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private static float Between(float min, float max, float value) {
 		if (value < min)
 			return min;
@@ -685,6 +685,7 @@ public class SmartModel {
 		return value;
 	}
 
+	@SuppressWarnings("unused")
 	private static float Normalize(float radiant) {
 		while (radiant > Half)
 			radiant -= Whole;

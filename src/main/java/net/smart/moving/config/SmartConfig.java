@@ -19,18 +19,15 @@ package net.smart.moving.config;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Map;
 
-import net.minecraft.client.Minecraft;
 import net.smart.moving.SmartMoving;
 import net.smart.properties.Properties;
 import net.smart.properties.Property;
 
 public class SmartConfig extends SmartProperties {
 	
+	private static final long serialVersionUID = 8024787486165092133L;
 	private static final String _smartMovingPropertiesFileName = "smart_moving_options.txt";
 	private static final String _sm_current = SmartMoving.VERSION;
 

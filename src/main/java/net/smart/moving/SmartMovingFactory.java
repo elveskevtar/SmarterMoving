@@ -17,13 +17,7 @@
 
 package net.smart.moving;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.smart.moving.player.SmartBase;
 import net.smart.moving.player.SmartPlayerBase;

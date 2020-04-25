@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.smart.moving.SmartMovingContext;
+import net.smart.moving.config.SmartOptions;
 
 public class SmartInput {
 	
@@ -32,7 +32,7 @@ public class SmartInput {
 		if (initialized)
 			return;
 		
-		ClientRegistry.registerKeyBinding(SmartMovingContext.Options.grabKey);
+		ClientRegistry.registerKeyBinding(SmartOptions.grabKey);
 		
 		initialized = true;
 	}

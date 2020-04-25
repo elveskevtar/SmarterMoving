@@ -5,7 +5,6 @@ import static net.smart.moving.utilities.RenderUtilities.Quarter;
 import static net.smart.moving.utilities.RenderUtilities.RadiantToAngle;
 import static net.smart.moving.utilities.RenderUtilities.Whole;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.util.math.MathHelper;
 import net.smart.moving.SmartMovingFactory;
@@ -23,9 +22,6 @@ public class SmartRender {
 	public SmartRenderPlayerBase base;
 	public final SmartModel modelBipedMain;
 	
-	private static int _iOffset, _jOffset;
-	private static Minecraft _minecraft;
-
 	public SmartRender(SmartRenderPlayerBase base) {
 		this.base = base;
 		
@@ -52,7 +48,6 @@ public class SmartRender {
 				float verticalAngle = (float) Math.atan2(diffY, horizontalMove);
 				if (Float.isNaN(verticalAngle) || horizontalMove <= 0.08)
 					verticalAngle = diffY < 0 ? -Quarter : Quarter;
-				float cameraAngle = entityplayer.rotationYaw / RadiantToAngle;
 				float forwardRotation = moving.forwardRotation / RadiantToAngle;
 				float horizontalAngle = 0;
 				if (horizontalMove >= 0.08) {

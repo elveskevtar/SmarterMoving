@@ -27,6 +27,8 @@ import net.smart.properties.Properties;
 import net.smart.properties.Property;
 
 public abstract class SmartProperties extends Properties {
+	
+	private static final long serialVersionUID = 2220698712537573450L;
 	public final static String Enabled = "enabled";
 	public final static String Disabled = "disabled";
 	private final static String[] _defaultKeys = new String[1];

@@ -1,6 +1,5 @@
 package net.smart.moving;
 
-import net.smart.moving.config.SmartConfig;
 import net.smart.moving.config.SmartOptions;
 import net.smart.moving.input.SmartInput;
 
@@ -15,7 +14,7 @@ public class SmartMovingContext {
 		if (initialized)
 			return;
 		
-		Input.registerKeys();
+		SmartInput.registerKeys();
 		
 		initialized = true;
 	}

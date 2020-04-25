@@ -3,14 +3,12 @@ package net.smart.moving.player;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.smart.moving.SmartMovingContext;
 import net.smart.moving.config.SmartOptions;
 import net.smart.moving.input.SmartInput;
 import net.smart.moving.network.SmartPacketHandler;
 import net.smart.moving.network.packet.StatePacket;
-import net.smart.moving.player.SmartBase.State;
 
 public class SmartPlayer extends SmartBase {
 	
@@ -40,8 +38,8 @@ public class SmartPlayer extends SmartBase {
 		if (state == null || state == State.INVALID)
 			return;
 		
-		boolean sneak = Input.isKeyDown(Minecraft.getMinecraft().gameSettings.keyBindSneak);
-		boolean grab = Input.isKeyDown(Options.grabKey);
+		boolean sneak = SmartInput.isKeyDown(Minecraft.getMinecraft().gameSettings.keyBindSneak);
+		boolean grab = SmartInput.isKeyDown(SmartOptions.grabKey);
 		
 		State newState = State.IDLE;
 		
