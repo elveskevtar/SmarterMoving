@@ -1,3 +1,9 @@
+---------------------
+Licensing Information
+---------------------
+The SmarterMoving mod reboot is operating under the MIT open source license.
+You can find the license in SmarterMovingLicense.txt.
+
 -------------------------------------------
 Source installation information for modders
 -------------------------------------------
