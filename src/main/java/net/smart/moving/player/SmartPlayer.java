@@ -88,5 +88,11 @@ public class SmartPlayer extends SmartBase {
 			event.getMovementInput().moveStrafe /= 0.3F;
 			event.getMovementInput().moveForward /= 0.3F;
 		}
+
+		/* fix jumping while crawling */
+		if (state == State.CRAWL && event.getMovementInput().jump) {
+			player.setJumping(false);
+			event.getMovementInput().jump = false;
+		}
 	}
 }
