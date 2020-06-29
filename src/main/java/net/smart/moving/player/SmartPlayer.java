@@ -46,7 +46,7 @@ public class SmartPlayer extends SmartBase {
 		if (sneak)
 			newState = State.SNEAK;
 		
-		if (sneak && grab)
+		if (sneak && grab || state == State.CRAWL && sneak)
 			newState = State.CRAWL;
 		
 		if (state == State.CRAWL && newState != State.CRAWL && !smartPlayer.isHeadspaceFree())
