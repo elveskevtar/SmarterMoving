@@ -246,28 +246,20 @@ public class SmartModel {
 		
 		if (state != null) {
 			switch (state) {
-			case IDLE:
-				animateStandard(totalHorizontalDistance, currentHorizontalSpeed,
+				case IDLE:
+				case SNEAK:
+				case ELYTRA:
+					animateStandard(totalHorizontalDistance, currentHorizontalSpeed,
 						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
 						factor, entity);
 				break;
-			case SNEAK:
-				animateStandard(totalHorizontalDistance, currentHorizontalSpeed,
-						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
-						factor, entity);
-				break;
-			case CRAWL:
+				case CRAWL:
 				animateCrawling(totalHorizontalDistance, currentHorizontalSpeed,
 						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
 						factor, entity);
 				break;
 			case FLY:
 				animateFlying(totalHorizontalDistance, currentHorizontalSpeed,
-						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
-						factor, entity);
-				break;
-			case ELYTRA:
-				animateStandard(totalHorizontalDistance, currentHorizontalSpeed,
 						totalTime, viewHorizontalAngleOffset, viewVerticalAngleOffset,
 						factor, entity);
 				break;

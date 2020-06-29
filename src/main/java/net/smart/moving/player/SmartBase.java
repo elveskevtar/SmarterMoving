@@ -121,11 +121,7 @@ public abstract class SmartBase {
 	        if (horizontalMove > 0) {
 	            float moveDir = (float) (MathHelper.atan2(diffPosZ, diffPosX) * 180F / Math.PI - 90.0F);
 	            float yawMoveDiff = MathHelper.abs(MathHelper.wrapDegrees(player.rotationYaw) - moveDir);
-
-	            if (95.0F < yawMoveDiff && yawMoveDiff < 265.0F && state != State.CRAWL)
-	                yawOffset = moveDir - 180.0F;
-	            else
-	                yawOffset = moveDir;
+				yawOffset = moveDir;
 	        }
 
 	        if (player.swingProgress > 0.0F)

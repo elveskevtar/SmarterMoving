@@ -73,13 +73,20 @@ public class SmartPlayer extends SmartBase {
 		
 		/* fix sneaking when need to crawl */
 		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
-		if (state == State.CRAWL && !smartPlayer.isHeadspaceFree()) {
-			if (event.getMovementInput().sneak == false) {
-				player.setSneaking(true);
-				event.getMovementInput().sneak = true;
-				event.getMovementInput().moveStrafe *= 0.3F;
-				event.getMovementInput().moveForward *= 0.3F;
-			}
+		if (state == State.CRAWL && !smartPlayer.isHeadspaceFree()
+				&& !event.getMovementInput().sneak) {
+			player.setSneaking(true);
+			event.getMovementInput().sneak = true;
+			event.getMovementInput().moveStrafe *= 0.3F;
+			event.getMovementInput().moveForward *= 0.3F;
+		}
+
+		/* fix sneak use during flying */
+		if (state == State.FLY && event.getMovementInput().sneak) {
+			player.setSneaking(false);
+			event.getMovementInput().sneak = false;
+			event.getMovementInput().moveStrafe /= 0.3F;
+			event.getMovementInput().moveForward /= 0.3F;
 		}
 	}
 }
