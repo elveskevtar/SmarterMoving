@@ -73,7 +73,7 @@ public class SmartMoving {
     @SubscribeEvent
     public void onPlayerTick(TickEvent.PlayerTickEvent event) {
     	if (event.phase == Phase.START && event.player.world.isRemote)
-    		SmartPlayer.onPlayerTick(event.player);
+    		SmartPlayer.computeNewSmartState(event.player);
     }
     
     @SubscribeEvent

@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Random;
 
+import net.smart.moving.player.state.State;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -43,7 +44,6 @@ import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import net.smart.moving.player.SmartBase;
 import net.smart.moving.player.SmartPlayer;
 import net.smart.moving.player.SmartPlayerBase;
 import net.smart.moving.render.SmartModelCapeRenderer;
@@ -101,7 +101,7 @@ public class SmartModel {
 	public int scaleArmType;
 	public int scaleLegType;
 	
-	public SmartBase.State state;
+	public State state;
 	public float currentHorizontalSpeedFlattened;
 	public float prevMoveAngle;
 

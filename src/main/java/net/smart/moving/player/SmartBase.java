@@ -11,36 +11,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.smart.moving.capabilities.ISmartStateHandler;
 import net.smart.moving.capabilities.SmartStateProvider;
+import net.smart.moving.player.state.State;
 import net.smart.moving.utilities.RenderUtilities;
 
 public abstract class SmartBase {
-	
-	public static enum State {
-		INVALID(-1), IDLE(0), SNEAK(1), CRAWL(2), FLY(3), ELYTRA(4);
-		
-		public final byte id;
-		
-		State(int id) {
-			this.id = (byte) id;
-		}
-		
-		public static State getState(byte stateId) {
-			for (State state : State.values())
-				if (state.id == stateId)
-					return state;
-			return State.INVALID;
-		}
-	}
-	
+
 	private Set<BlockPos> boundingBlocks = new HashSet<BlockPos>();
-	
-	protected static final float defaultHeight = 1.8F;
-	protected static final float sneakHeight = 1.65F;
-	protected static final float crawlHeight = 0.65F;
-	protected static final float crawlEyeHeight = 0.5F;
-	protected static final float crawlDampingFactor = 0.3F;
-	protected static final float flySpeedFactor = 0.5F;
-	
+
 	protected EntityPlayer player;
 	
 	public float currentSpeed;
@@ -55,25 +32,13 @@ public abstract class SmartBase {
 	
 	public void afterOnUpdate() {
 		State state = getState(player);
-		if (state == null || state == State.INVALID)
+		if (state == null)
 			return;
-		
-		if (state == State.IDLE) {
-			player.height = defaultHeight;
-			player.eyeHeight = player.getDefaultEyeHeight();
-		} else if (state == State.SNEAK) {
-			player.height = sneakHeight;
-		} else if (state == State.CRAWL) {
-			setHorizontalDamping(crawlDampingFactor);
-			player.height = crawlHeight;
-			player.eyeHeight = crawlEyeHeight;
-		} else if (state == State.FLY) {
-			player.height = defaultHeight;
-			player.eyeHeight = player.getDefaultEyeHeight();
-		}
-		
+
+		state.handler.afterOnUpdate(player);
 		updateBoundingBox();
-		updatePlayerRotations(state);
+		state.handler.updatePlayerRotations(player, this);
+		wrapRotations();
 	}
 	
 	protected void moveFlying(float vertical, float strafing, float forward, float speedFactor, boolean threeDimensional) {
@@ -110,48 +75,6 @@ public abstract class SmartBase {
 		}
 	}
 	
-	protected void updatePlayerRotations(State state) {
-		switch (state) {
-		case CRAWL:
-	        double diffPosX = player.posX - player.prevPosX;
-	        double diffPosZ = player.posZ - player.prevPosZ;
-	        float horizontalMove = (float) Math.sqrt(diffPosX * diffPosX + diffPosZ * diffPosZ);
-	        float yawOffset = player.rotationYaw;
-	        
-	        if (horizontalMove > 0) {
-	            float moveDir = (float) (MathHelper.atan2(diffPosZ, diffPosX) * 180F / Math.PI - 90.0F);
-	            float yawMoveDiff = MathHelper.abs(MathHelper.wrapDegrees(player.rotationYaw) - moveDir);
-				yawOffset = moveDir;
-	        }
-
-	        if (player.swingProgress > 0.0F)
-	            yawOffset = player.rotationYaw;
-	        
-	        float f = MathHelper.wrapDegrees(yawOffset - player.renderYawOffset);
-	        player.renderYawOffset += f * 0.3F;
-	        float f1 = MathHelper.wrapDegrees(player.rotationYaw - player.renderYawOffset);
-
-	        if (f1 < -75.0F)
-	            f1 = -75.0F;
-
-	        if (f1 >= 75.0F)
-	            f1 = 75.0F;
-
-	        player.renderYawOffset = player.rotationYaw - f1;
-
-	        if (f1 * f1 > 2500.0F)
-	        	player.renderYawOffset += f1 * 0.2F;
-			break;
-		case FLY:
-			player.renderYawOffset = forwardRotation;
-			break;
-		default:
-			break;
-		}
-
-        wrapRotations();
-	}
-	
 	protected void setHorizontalDamping(float horizontalDamping) {
 		player.motionX *= horizontalDamping;
 		player.motionZ *= horizontalDamping;
@@ -162,7 +85,7 @@ public abstract class SmartBase {
 		AxisAlignedBB aabb = player.getEntityBoundingBox();
 		player.setEntityBoundingBox(new AxisAlignedBB(player.posX - d0, aabb.minY,
 				player.posZ - d0, player.posX + d0, aabb.minY + player.height, player.posZ + d0));
-		
+
 		boundingBlocks.clear();
 		aabb = player.getEntityBoundingBox();
 		for (int x = (int)Math.floor(aabb.minX); x <= (int)Math.floor(aabb.maxX); x++)
@@ -176,7 +99,7 @@ public abstract class SmartBase {
 		return !blockState.getBlock().isNormalCube(blockState, player.world, pos)
 				&& !upBlockState.getBlock().isNormalCube(upBlockState, player.world, pos.up());
 	}
-	
+
 	protected boolean isHeadspaceFree() {
 		for (BlockPos pos : boundingBlocks)
 			if (!isOpenBlockSpace(pos))
