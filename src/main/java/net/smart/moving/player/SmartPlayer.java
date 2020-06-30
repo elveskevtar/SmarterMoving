@@ -49,7 +49,9 @@ public class SmartPlayer extends SmartBase {
 		if (sneak && grab || state == State.CRAWL && sneak)
 			newState = State.CRAWL;
 		
-		if (state == State.CRAWL && newState != State.CRAWL && !smartPlayer.isHeadspaceFree())
+		if ( (state == State.CRAWL || state == state.ELYTRA)
+				&& newState != State.CRAWL
+				&& !smartPlayer.isHeadspaceFree())
 			newState = State.CRAWL;
 		
 		if (player.capabilities.isFlying)
