@@ -166,8 +166,9 @@ public abstract class SmartBase {
 		boundingBlocks.clear();
 		aabb = player.getEntityBoundingBox();
 		for (int x = (int)Math.floor(aabb.minX); x <= (int)Math.floor(aabb.maxX); x++)
-			for (int z = (int)Math.floor(aabb.minZ); z <= (int)Math.floor(aabb.maxZ); z++)
-				boundingBlocks.add(new BlockPos(x, (int)player.posY, z));
+			for (int y = (int)Math.floor(aabb.minY); y <= (int)Math.floor(aabb.maxY); y++)
+				for (int z = (int)Math.floor(aabb.minZ); z <= (int)Math.floor(aabb.maxZ); z++)
+					boundingBlocks.add(new BlockPos(x, y, z));
 	}
 	
 	protected boolean isOpenBlockSpace(BlockPos pos) {
