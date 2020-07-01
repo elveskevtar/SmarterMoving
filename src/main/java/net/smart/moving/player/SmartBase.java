@@ -40,45 +40,6 @@ public abstract class SmartBase {
 		state.handler.updatePlayerRotations(player, this);
 		wrapRotations();
 	}
-	
-	protected void moveFlying(float vertical, float strafing, float forward, float speedFactor, boolean threeDimensional) {
-		float diffMotionXStrafing = 0, diffMotionXForward = 0, diffMotionZStrafing = 0, diffMotionZForward = 0;
-		float horizontalTotal = MathHelper.sqrt(strafing * strafing + forward * forward);
-		if(horizontalTotal >= 0.01F) {
-			if(horizontalTotal < 1.0F)
-				horizontalTotal = 1.0F;
-
-			float moveStrafingFactor = strafing / horizontalTotal;
-			float moveForwardFactor = forward / horizontalTotal;
-			float sin = MathHelper.sin((float) (player.rotationYaw * Math.PI / 180F));
-			float cos = MathHelper.cos((float) (player.rotationYaw * Math.PI / 180F));
-			diffMotionXStrafing = moveStrafingFactor * cos;
-			diffMotionXForward = -moveForwardFactor * sin;
-			diffMotionZStrafing = moveStrafingFactor * sin;
-			diffMotionZForward = moveForwardFactor * cos;
-		}
-
-		float rotation = threeDimensional ? player.rotationPitch / RenderUtilities.RadiantToAngle : 0;
-		float divingHorizontalFactor = MathHelper.cos(rotation);
-		float divingVerticalFactor = -MathHelper.sin(rotation) * Math.signum(forward);
-
-		float diffMotionX = diffMotionXForward * divingHorizontalFactor + diffMotionXStrafing;
-		float diffMotionY = MathHelper.sqrt(diffMotionXForward * diffMotionXForward + diffMotionZForward * diffMotionZForward) * divingVerticalFactor + vertical;
-		float diffMotionZ = diffMotionZForward * divingHorizontalFactor + diffMotionZStrafing;
-
-		float total = MathHelper.sqrt(MathHelper.sqrt(diffMotionX * diffMotionX + diffMotionZ * diffMotionZ) + diffMotionY * diffMotionY);
-		if(total > 0.01F) {
-			float factor = speedFactor / total;
-			player.motionX = diffMotionX * factor;
-			player.motionY = diffMotionY * factor;
-			player.motionZ = diffMotionZ * factor;
-		}
-	}
-	
-	protected void setHorizontalDamping(float horizontalDamping) {
-		player.motionX *= horizontalDamping;
-		player.motionZ *= horizontalDamping;
-	}
 
 	protected void updateBoundingBox() {
 		final double d0 = player.width / 2.0D;
@@ -106,10 +67,6 @@ public abstract class SmartBase {
 			if (!isOpenBlockSpace(pos))
 				return false;
 		return true;
-	}
-	
-	protected BlockPos getBlockPos() {
-		return new BlockPos(Math.floor(player.posX), player.posY, Math.floor(player.posZ));
 	}
 	
 	private void wrapRotations() {
