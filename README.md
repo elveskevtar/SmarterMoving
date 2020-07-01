@@ -1,10 +1,36 @@
----------------------
+SmarterMoving Mod
+=================
+This is Elveskevtar's reboot of Divisor and JonnyNova's original SmartMoving
+mod. The plan is to restore the mod to a very similar state of the original
+when it was being actively maintained. However, not all details will remain
+the same. Any and all changes will be subject to potential change from the
+original mod. Brand-new aspects not available in the original mod may be
+implemented within this reboot.
+
 Licensing Information
 ---------------------
 The SmarterMoving mod reboot is operating under the MIT open source license.
-You can find the license in SmarterMovingLicense.txt.
+You can find the license in [LICENSE-SmarterMoving.txt](LICENSE-SmarterMoving.txt).
 
--------------------------------------------
+Licenses for MinecraftForge and Paulscode can also be found within this repository.
+
+Contributing
+------------
+We plan on fostering a collaborative and inclusive community for contributing.
+We have an active discord server for those interested in becoming more involved.
+See the [Contributing Document](CONTRIBUTING.md) for more information on how you
+can make contributions and become involved in the modding community.
+
+Code of Conduct
+---------------
+In order to maintain a collaborative and inclusive community, we have ground rules
+to keep discussion civil and respectful. We also hope to minimize harmful conflict
+and harmful communication. While contributing or interacting with our community,
+please follow the rules and guidelines within the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+MinecraftForge
+==============
+
 Source installation information for modders
 -------------------------------------------
 This code follows the Minecraft Forge installation methodology. It will apply
@@ -18,7 +44,7 @@ normal code.
 Source pack installation information:
 
 Standalone source installation
-==============================
+------------------------------
 
 See the Forge Documentation online for more detailed instructions:
 http://mcforge.readthedocs.io/en/latest/gettingstarted/
@@ -47,12 +73,12 @@ Refer to #ForgeGradle on EsperNet for more information about the gradle environm
 or the Forge Project Discord discord.gg/UvedJ9m
 
 Forge source installation
-=========================
+-------------------------
 MinecraftForge ships with this code and installs it as part of the forge
 installation process, no further action is required on your part.
 
 LexManos' Install Video
-=======================
+-----------------------
 https://www.youtube.com/watch?v=8VEdtQLuLO0&feature=youtu.be
 
 For more details update more often refer to the Forge Forums:

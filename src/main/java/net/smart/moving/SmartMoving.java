@@ -31,8 +31,8 @@ import net.smart.moving.render.SmartRenderPlayerBase;
 
 @Mod(modid = SmartMoving.MODID, name = SmartMoving.NAME, version = SmartMoving.VERSION, useMetadata = true)
 public class SmartMoving {
-    public static final String MODID = "smartmoving";
-    public static final String NAME = "Smart Moving";
+    public static final String MODID = "smartermoving";
+    public static final String NAME = "Smarter Moving";
     public static final String VERSION = "@VERSION@";
 
     public static Logger logger;
