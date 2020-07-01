@@ -16,7 +16,7 @@ import net.smart.moving.utilities.RenderUtilities;
 
 public abstract class SmartBase {
 
-	private Set<BlockPos> boundingBlocks = new HashSet<BlockPos>();
+	private final Set<BlockPos> boundingBlocks = new HashSet<>();
 
 	protected EntityPlayer player;
 	

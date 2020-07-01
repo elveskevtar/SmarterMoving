@@ -1,5 +1,7 @@
 package net.smart.moving.player.state;
 
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
 import net.smart.moving.player.PlayerConstants;
@@ -8,7 +10,28 @@ import net.smart.moving.utilities.RenderUtilities;
 
 public class StateHandlerFly extends StateHandler {
 
-    public static void moveFlying(EntityPlayer player, float vertical, float strafing, float forward, boolean threeDimensional) {
+    public static void moveFlying(EntityPlayerSP player, float vertical, float strafing, float forward) {
+        float moveUpward = 0F;
+        if (player.movementInput.sneak) {
+            player.motionY += PlayerConstants.FLY_VERTICAL_VELOCITY;
+            moveUpward -= PlayerConstants.FLY_MOVE_SPEED;
+        }
+
+        if (player.movementInput.jump) {
+            player.motionY -= PlayerConstants.FLY_VERTICAL_VELOCITY;
+            moveUpward += PlayerConstants.FLY_MOVE_SPEED;
+        }
+
+        moveAltFlying(player, moveUpward, strafing, forward);
+
+        player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
+
+        player.motionX *= PlayerConstants.HORIZONTAL_AIR_DAMPING;
+        player.motionY *= PlayerConstants.HORIZONTAL_AIR_DAMPING;
+        player.motionZ *= PlayerConstants.HORIZONTAL_AIR_DAMPING;
+    }
+
+    public static void moveAltFlying(EntityPlayer player, float vertical, float strafing, float forward) {
         float diffMotionXStrafing = 0, diffMotionXForward = 0, diffMotionZStrafing = 0, diffMotionZForward = 0;
         float horizontalTotal = MathHelper.sqrt(strafing * strafing + forward * forward);
         if(horizontalTotal >= 0.01F) {
@@ -25,7 +48,7 @@ public class StateHandlerFly extends StateHandler {
             diffMotionZForward = moveForwardFactor * cos;
         }
 
-        float rotation = threeDimensional ? player.rotationPitch / RenderUtilities.RadiantToAngle : 0;
+        float rotation = player.rotationPitch / RenderUtilities.RadiantToAngle;
         float divingHorizontalFactor = MathHelper.cos(rotation);
         float divingVerticalFactor = -MathHelper.sin(rotation) * Math.signum(forward);
 

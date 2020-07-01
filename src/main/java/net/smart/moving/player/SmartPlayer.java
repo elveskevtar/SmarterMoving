@@ -17,7 +17,7 @@ public class SmartPlayer extends SmartBase {
 	protected static final SmartInput Input = SmartMovingContext.Input;
 	protected static final SmartOptions Options = SmartMovingContext.Options;
 
-	private SmartPlayerBase base;
+	private final SmartPlayerBase base;
 	
 	public SmartPlayer(SmartPlayerBase base, EntityPlayer player) {
 		super(player);
@@ -26,12 +26,14 @@ public class SmartPlayer extends SmartBase {
 	
 	public void moveEntityWithHeading(float strafing, float vertical, float forward) {
 		State state = getState(player);
-		if (state == null || state == State.INVALID)
+		if (state == null || state == State.INVALID || !(player instanceof EntityPlayerSP))
 			return;
-		
+
+		EntityPlayerSP playersp = (EntityPlayerSP) player;
 		if (state == State.FLY)
-			StateHandlerFly.moveFlying(player, vertical, strafing, forward, true);
-		base.superMoveEntityWithHeading(strafing, vertical, forward);
+			StateHandlerFly.moveFlying(playersp, vertical, strafing, forward);
+		else
+			base.superMoveEntityWithHeading(strafing, vertical, forward);
 	}
 	
 	public static void computeNewSmartState(EntityPlayer player) {
@@ -85,14 +87,6 @@ public class SmartPlayer extends SmartBase {
 			event.getMovementInput().sneak = true;
 			event.getMovementInput().moveStrafe *= 0.3F;
 			event.getMovementInput().moveForward *= 0.3F;
-		}
-
-		/* fix sneak use during flying */
-		if (state == State.FLY && event.getMovementInput().sneak) {
-			player.setSneaking(false);
-			event.getMovementInput().sneak = false;
-			event.getMovementInput().moveStrafe /= 0.3F;
-			event.getMovementInput().moveForward /= 0.3F;
 		}
 
 		/* fix jumping while crawling */
