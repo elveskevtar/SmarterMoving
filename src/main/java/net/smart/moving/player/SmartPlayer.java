@@ -36,10 +36,12 @@ public class SmartPlayer extends SmartBase {
 	
 	public static void computeNewSmartState(EntityPlayer player) {
 		State state = SmartBase.getState(player);
-		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
-		if (state == null || state == State.INVALID)
+
+		if (state == null || state == State.INVALID || !(player instanceof EntityPlayerSP))
 			return;
-		
+
+        SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
+
 		boolean sneak = SmartInput.isKeyDown(Minecraft.getMinecraft().gameSettings.keyBindSneak);
 		boolean grab = SmartInput.isKeyDown(SmartOptions.grabKey);
 
