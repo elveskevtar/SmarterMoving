@@ -9,6 +9,8 @@ import net.smart.moving.config.SmartOptions;
 import net.smart.moving.input.SmartInput;
 import net.smart.moving.network.SmartPacketHandler;
 import net.smart.moving.network.packet.StatePacket;
+import net.smart.moving.player.state.State;
+import net.smart.moving.player.state.StateHandlerFly;
 
 public class SmartPlayer extends SmartBase {
 	
@@ -28,11 +30,11 @@ public class SmartPlayer extends SmartBase {
 			return;
 		
 		if (state == State.FLY)
-			moveFlying(vertical, strafing, forward, flySpeedFactor, true);
+			StateHandlerFly.moveFlying(player, vertical, strafing, forward, true);
 		base.superMoveEntityWithHeading(strafing, vertical, forward);
 	}
 	
-	public static void onPlayerTick(EntityPlayer player) {
+	public static void computeNewSmartState(EntityPlayer player) {
 		State state = SmartBase.getState(player);
 		SmartPlayer smartPlayer = SmartPlayerBase.getPlayerBase((EntityPlayerSP) player).getSmartPlayer();
 		if (state == null || state == State.INVALID)
@@ -40,7 +42,7 @@ public class SmartPlayer extends SmartBase {
 		
 		boolean sneak = SmartInput.isKeyDown(Minecraft.getMinecraft().gameSettings.keyBindSneak);
 		boolean grab = SmartInput.isKeyDown(SmartOptions.grabKey);
-		
+
 		State newState = State.IDLE;
 		
 		if (sneak)

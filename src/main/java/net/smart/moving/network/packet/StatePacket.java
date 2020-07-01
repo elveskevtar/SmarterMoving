@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.smart.moving.player.SmartBase;
-import net.smart.moving.player.SmartBase.State;
+import net.smart.moving.player.state.State;
 
 public class StatePacket implements IMessage {
 
