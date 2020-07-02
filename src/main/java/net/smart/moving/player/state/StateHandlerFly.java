@@ -10,7 +10,7 @@ import net.smart.moving.utilities.RenderUtilities;
 
 public class StateHandlerFly extends StateHandler {
 
-    public static void moveFlying(EntityPlayerSP player, float vertical, float strafing, float forward) {
+    public static void moveFlying(EntityPlayerSP player, float strafing, float forward) {
         float moveUpward = 0F;
         if (player.movementInput.sneak) {
             player.motionY += PlayerConstants.FLY_VERTICAL_VELOCITY;
@@ -23,7 +23,6 @@ public class StateHandlerFly extends StateHandler {
         }
 
         moveAltFlying(player, moveUpward, strafing, forward);
-
         player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
 
         player.motionX *= PlayerConstants.HORIZONTAL_AIR_DAMPING;
@@ -66,13 +65,24 @@ public class StateHandlerFly extends StateHandler {
     }
 
     @Override
-    public void afterOnUpdate(EntityPlayer player) {
-        player.height = PlayerConstants.DEFAULT_HEIGHT;
-        player.eyeHeight = player.getDefaultEyeHeight();
+    public void afterOnUpdate(EntityPlayer player, SmartBase smartBase) {
+        // TODO: Dynamically change BB to update based on horizontal velocity
     }
 
     @Override
     public void updatePlayerRotations(EntityPlayer player, SmartBase smartBase) {
         player.renderYawOffset = smartBase.forwardRotation;
+    }
+
+    @Override
+    public void startState(EntityPlayer player, SmartBase smartBase) {
+        player.height = PlayerConstants.DEFAULT_HEIGHT;
+        player.eyeHeight = player.getDefaultEyeHeight();
+        smartBase.bbYOffset = player.height / 2.0D;
+    }
+
+    @Override
+    public void stopState(EntityPlayer player, SmartBase smartBase) {
+        smartBase.bbYOffset = 0;
     }
 }

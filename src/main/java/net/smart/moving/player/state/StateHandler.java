@@ -5,8 +5,12 @@ import net.smart.moving.player.SmartBase;
 
 public abstract class StateHandler {
 
-    public void afterOnUpdate(EntityPlayer player) {}
+    public void afterOnUpdate(EntityPlayer player, SmartBase base) {}
 
     public void updatePlayerRotations(EntityPlayer player, SmartBase smartBase) {}
+
+    public void startState(EntityPlayer player, SmartBase smartBase) {}
+
+    public void stopState(EntityPlayer player, SmartBase smartBase) {}
 
 }

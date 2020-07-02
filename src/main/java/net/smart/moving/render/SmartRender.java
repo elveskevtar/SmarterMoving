@@ -11,6 +11,7 @@ import net.smart.moving.SmartMovingFactory;
 import net.smart.moving.model.SmartModel;
 import net.smart.moving.model.SmartModelPlayerBase;
 import net.smart.moving.player.SmartBase;
+import net.smart.moving.player.state.State;
 
 public class SmartRender {
 	
@@ -36,8 +37,9 @@ public class SmartRender {
 	
 	public void doRender(AbstractClientPlayer entityplayer,
 			double d, double d1, double d2, float f, float renderPartialTicks) {
-		SmartModelPlayerBase[] playerModels = null;
+		SmartModelPlayerBase[] playerModels;
 		SmartBase moving = SmartMovingFactory.getInstance(entityplayer);
+		State state = SmartBase.getState(entityplayer);
 		if (moving != null) {
 			boolean isInventory = d == 0.0F && d1 == 0.0F && d2 == 0.0F && f == 0.0F && renderPartialTicks == 1.0F;
 			if (!isInventory) {
@@ -53,29 +55,33 @@ public class SmartRender {
 				if (horizontalMove >= 0.08) {
 					horizontalAngle = (float) Math.atan2(diffZ, diffX) - forwardRotation - Quarter;
 					if (Float.isNaN(horizontalAngle) || diffX == 0 || diffZ == 0)
-						horizontalAngle = moving.horizontalAngle;				
+						horizontalAngle = moving.horizontalAngle;
 					while (horizontalAngle - moving.horizontalAngle > Half)
 						horizontalAngle -= Whole;
 					while (horizontalAngle - moving.horizontalAngle < -Half)
 						horizontalAngle += Whole;
 				}
-				
+
 				moving.currentSpeed = MathHelper.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2) + Math.pow(diffZ, 2));
 				moving.forwardRotation = entityplayer.prevRotationYaw + (entityplayer.rotationYaw - entityplayer.prevRotationYaw) * renderPartialTicks;
 				moving.verticalAngle += (verticalAngle - moving.verticalAngle) * 0.1F;
 				moving.horizontalAngle += (horizontalAngle - moving.horizontalAngle) * 0.1F;
 				moving.totalDistance += moving.currentSpeed * renderPartialTicks;
 			}
-			
+
 			playerModels = base.getRenderModels();
 			for (SmartModelPlayerBase model : playerModels) {
 				SmartModel playerModel = model.getRenderModel();
-				playerModel.state = SmartBase.getState(entityplayer);
+				playerModel.state = state;
 			}
 		}
-		
+
+		if (state == State.FLY && entityplayer.isSneaking())
+			d1 += 0.225D;
+
 		CurrentMainModel = modelBipedMain;
-		base.superDoRender(entityplayer, d, d1, d2, f, renderPartialTicks);
+		base.superDoRender(entityplayer, d + entityplayer.renderOffsetX,
+				d1 + entityplayer.renderOffsetY, d2 + entityplayer.renderOffsetZ, f, renderPartialTicks);
 		CurrentMainModel = null;
 	}
 }

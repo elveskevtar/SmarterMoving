@@ -7,14 +7,10 @@ import net.smart.moving.player.SmartBase;
 
 public class StateHandlerCrawl extends StateHandler {
 
-    private void applyHorizontalDamping(EntityPlayer player, float horizontalDamping) {
-        player.motionX *= horizontalDamping;
-        player.motionZ *= horizontalDamping;
-    }
-
 	@Override
-    public void afterOnUpdate(EntityPlayer player) {
-        applyHorizontalDamping(player, PlayerConstants.CRAWL_DAMPING_FACTOR);
+    public void afterOnUpdate(EntityPlayer player, SmartBase smartBase) {
+        player.motionX *= PlayerConstants.CRAWL_DAMPING_FACTOR;
+        player.motionZ *= PlayerConstants.CRAWL_DAMPING_FACTOR;
         player.height = PlayerConstants.CRAWL_HEIGHT;
         player.eyeHeight = PlayerConstants.CRAWL_EYE_HEIGHT;
     }
@@ -26,12 +22,8 @@ public class StateHandlerCrawl extends StateHandler {
         float horizontalMove = (float) Math.sqrt(diffPosX * diffPosX + diffPosZ * diffPosZ);
         float yawOffset = player.rotationYaw;
 
-        if (horizontalMove > 0) {
-            float moveDir = (float) (MathHelper.atan2(diffPosZ, diffPosX) * 180F / Math.PI - 90.0F);
-            float yawMoveDiff = MathHelper.abs(MathHelper.wrapDegrees(player.rotationYaw) - moveDir);
-
-            yawOffset = moveDir;
-        }
+        if (horizontalMove > 0)
+            yawOffset = (float) (MathHelper.atan2(diffPosZ, diffPosX) * 180F / Math.PI - 90.0F);
 
         if (player.swingProgress > 0.0F)
             yawOffset = player.rotationYaw;

@@ -8,14 +8,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.smart.moving.capabilities.ISmartStateHandler;
 import net.smart.moving.capabilities.SmartStateProvider;
 import net.smart.moving.player.state.State;
-import net.smart.moving.utilities.RenderUtilities;
 
 public abstract class SmartBase {
 
+	public double bbYOffset;
 	private final Set<BlockPos> boundingBlocks = new HashSet<>();
 
 	protected EntityPlayer player;
@@ -35,20 +34,19 @@ public abstract class SmartBase {
 		if (state == null)
 			return;
 
-		state.handler.afterOnUpdate(player);
-		updateBoundingBox();
+		state.handler.afterOnUpdate(player, this);
 		state.handler.updatePlayerRotations(player, this);
+		updateBoundingBox();
 		wrapRotations();
 	}
 
 	protected void updateBoundingBox() {
 		final double d0 = player.width / 2.0D;
-		AxisAlignedBB aabb = player.getEntityBoundingBox();
-		player.setEntityBoundingBox(new AxisAlignedBB(player.posX - d0, aabb.minY,
-				player.posZ - d0, player.posX + d0, aabb.minY + player.height, player.posZ + d0));
+		player.setEntityBoundingBox(new AxisAlignedBB(player.posX - d0, player.posY + bbYOffset,
+				player.posZ - d0, player.posX + d0, player.posY + bbYOffset + player.height, player.posZ + d0));
 
 		boundingBlocks.clear();
-		aabb = player.getEntityBoundingBox();
+		AxisAlignedBB aabb = player.getEntityBoundingBox();
 		for (int x = (int)Math.floor(aabb.minX); x <= (int)Math.floor(aabb.maxX); x++)
 			for (int y = (int)Math.floor(aabb.minY); y <= (int)Math.floor(aabb.maxY); y++)
 				for (int z = (int)Math.floor(aabb.minZ); z <= (int)Math.floor(aabb.maxZ); z++)

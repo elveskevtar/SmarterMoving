@@ -7,7 +7,7 @@ import net.smart.moving.player.SmartBase;
 public class StateHandlerSneak extends StateHandler {
 
     @Override
-    public void afterOnUpdate(EntityPlayer player) {
+    public void afterOnUpdate(EntityPlayer player, SmartBase smartBase) {
         player.height = PlayerConstants.SNEAK_HEIGHT;
     }
 

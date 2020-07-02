@@ -31,9 +31,11 @@ public class SmartPlayer extends SmartBase {
 
 		EntityPlayerSP playersp = (EntityPlayerSP) player;
 		if (state == State.FLY)
-			StateHandlerFly.moveFlying(playersp, vertical, strafing, forward);
+			StateHandlerFly.moveFlying(playersp, strafing, forward);
 		else
 			base.superMoveEntityWithHeading(strafing, vertical, forward);
+
+		player.posY -= bbYOffset;
 	}
 	
 	public static void computeNewSmartState(EntityPlayer player) {
@@ -67,6 +69,9 @@ public class SmartPlayer extends SmartBase {
 			newState = State.ELYTRA;
 		
 		if (newState != state) {
+			state.handler.stopState(player, smartPlayer);
+			newState.handler.startState(player, smartPlayer);
+
 			SmartBase.setState(player, newState);
 			StatePacket packet = new StatePacket(player.getEntityId(), newState.id);
 			SmartPacketHandler.INSTANCE.sendToServer(packet);

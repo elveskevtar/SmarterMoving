@@ -11,7 +11,7 @@ public final class PlayerConstants {
 
     public static final float CRAWL_DAMPING_FACTOR = 0.3F;
 
-    public static final float FLY_SPEED_FACTOR = 0.35F;
+    public static final float FLY_SPEED_FACTOR = 0.4F;
     public static final float FLY_VERTICAL_VELOCITY = 0.15F;
     public static final float FLY_MOVE_SPEED = 0.98F;
 

@@ -7,15 +7,11 @@ import net.smart.moving.SmartMoving;
 
 public class SmartServerPlayerBase extends ServerPlayerBase {
 
-	private SmartServer server;
+	private final SmartServer server;
 	
 	public SmartServerPlayerBase(ServerPlayerAPI playerAPI) {
 		super(playerAPI);
 		server = new SmartServer(this, player);
-	}
-	
-	public static SmartServerPlayerBase getPlayerBase(Object player) {
-		return (SmartServerPlayerBase) ((IServerPlayerAPI) player).getServerPlayerBase(SmartMoving.NAME);
 	}
 	
 	@Override
@@ -25,5 +21,9 @@ public class SmartServerPlayerBase extends ServerPlayerBase {
 	
 	public SmartServer getServer() {
 		return server;
+	}
+
+	public static SmartServerPlayerBase getPlayerBase(Object player) {
+		return (SmartServerPlayerBase) ((IServerPlayerAPI) player).getServerPlayerBase(SmartMoving.NAME);
 	}
 }

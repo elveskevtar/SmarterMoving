@@ -3,14 +3,13 @@ package net.smart.moving.player;
 import api.player.client.ClientPlayerAPI;
 import api.player.client.ClientPlayerBase;
 import api.player.client.IClientPlayerAPI;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.smart.moving.SmartMoving;
 
 public class SmartPlayerBase extends ClientPlayerBase {
 
-	private SmartPlayer smartPlayer;
-	
+	private final SmartPlayer smartPlayer;
+
 	public SmartPlayerBase(ClientPlayerAPI playerAPI) {
 		super(playerAPI);
 		this.smartPlayer = new SmartPlayer(this, player);
@@ -28,14 +27,6 @@ public class SmartPlayerBase extends ClientPlayerBase {
 	
 	public void superMoveEntityWithHeading(float strafing, float vertical, float forward) {
 		super.moveEntityWithHeading(strafing, vertical, forward);
-	}
-	
-	public boolean getJumpField() {
-		return playerAPI.getIsJumpingField();
-	}
-	
-	public Minecraft getMCField() {
-		return playerAPI.getMcField();
 	}
 	
 	public SmartPlayer getSmartPlayer() {

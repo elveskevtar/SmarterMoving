@@ -3,9 +3,8 @@ package net.smart.moving.player;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class SmartServer extends SmartBase {
-	
-	@SuppressWarnings("unused")
-	private SmartServerPlayerBase base;
+
+	private final SmartServerPlayerBase base;
 
 	public SmartServer(SmartServerPlayerBase base, EntityPlayer player) {
 		super(player);
